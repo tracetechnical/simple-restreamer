@@ -5,14 +5,18 @@ import os
 from multiprocessing import freeze_support
 
 import cv2
+
 class Camera():
 
     def __init__(self, rtsp_url):
         # load pipe for data transmittion to the process
+        print("Starting pipe")
         self.parent_conn, child_conn = mp.Pipe()
         # load process
+        print("Starting process")
         self.p = mp.Process(target=self.update, args=(child_conn, rtsp_url))
         # start process
+        print("Starting daemon")
         self.p.daemon = True
         self.p.start()
 
@@ -125,7 +129,7 @@ if __name__ == '__main__':
     if not rtsp_path:
         print("RTSP_URL environment varaible not defined")
         exit(-1)
-    path = "rtspsrc location=" + rtsp_path + " latency=0 ! rtph264depay ! h264parse ! omxh264dec ! videoconvert ! appsink"
+    path = "rtspsrc location=" + rtsp_path + " latency=0 ! rtph264depay ! h264parse !  appsink"
     print("Path is:" + path)
     cam = Camera(path)
 
