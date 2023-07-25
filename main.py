@@ -5,18 +5,14 @@ import os
 from multiprocessing import freeze_support
 
 import cv2
-
 class Camera():
 
     def __init__(self, rtsp_url):
         # load pipe for data transmittion to the process
-        print("Starting pipe")
         self.parent_conn, child_conn = mp.Pipe()
         # load process
-        print("Starting process")
         self.p = mp.Process(target=self.update, args=(child_conn, rtsp_url))
         # start process
-        print("Starting daemon")
         self.p.daemon = True
         self.p.start()
 
@@ -29,8 +25,8 @@ class Camera():
         # load cam into seperate process
 
         print("Cam Loading...")
-        cap = cv2.VideoCapture(rtsp_url, cv2.CAP_GSTREAMER)
-        cap.set(cv2.CAP_PROP_BUFFERSIZE, 3)
+        os.putenv("OPENCV_FFMPEG_CAPTURE_OPTIONS", "rtsp_transport;tcp")
+        cap = cv2.VideoCapture(rtsp_url, cv2.CAP_FFMPEG)
         print("Cam Loaded...")
         run = True
 
@@ -121,7 +117,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
 
 if __name__ == '__main__':
     freeze_support()
-    print(cv2.getBuildInformation())
+
     port = 8000
     server = http.server.HTTPServer(('', port), CamHandler)
     time.sleep(5)
@@ -129,9 +125,7 @@ if __name__ == '__main__':
     if not rtsp_path:
         print("RTSP_URL environment varaible not defined")
         exit(-1)
-    path = "rtspsrc protocols=tcp location=" + rtsp_path + " latency=0 ! rtph264depay ! h264parse !  appsink"
-    print("Path is:" + path)
-    cam = Camera(path)
+    cam = Camera(rtsp_path)
 
     print(f"Camera is alive?: {cam.p.is_alive()}")
 
