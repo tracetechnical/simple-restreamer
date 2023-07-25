@@ -1,4 +1,4 @@
-FROM jjanzic/docker-python3-opencv
+FROM ubuntu
 
 WORKDIR /opt/app
 
