@@ -1,4 +1,4 @@
-FROM python:3.8-slim-buster
+FROM jjanzic/docker-python3-opencv
 
 WORKDIR /opt/app
 
