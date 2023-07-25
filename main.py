@@ -25,8 +25,7 @@ class Camera():
         # load cam into seperate process
 
         print("Cam Loading...")
-        os.putenv("OPENCV_FFMPEG_CAPTURE_OPTIONS","rtsp_transport;tcp")
-        cap = cv2.VideoCapture(rtsp_url, cv2.CAP_FFMPEG)
+        cap = cv2.VideoCapture(rtsp_url, cv2.CAP_GSTREAMER)
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 3)
         print("Cam Loaded...")
         run = True
