@@ -117,7 +117,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
 
 if __name__ == '__main__':
     freeze_support()
-
+    print(cv2.getBuildInformation())
     port = 8000
     server = http.server.HTTPServer(('', port), CamHandler)
     time.sleep(5)
