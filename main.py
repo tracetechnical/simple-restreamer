@@ -15,9 +15,9 @@ class Camera():
         # load process
         print("Starting process")
         self.p = mp.Process(target=self.update, args=(child_conn, rtsp_url))
-        # # start process
-        # print("Starting daemon")
-        # self.p.daemon = True
+        # start process
+        print("Starting daemon")
+        self.p.daemon = True
         self.p.start()
 
     def end(self):
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     if not rtsp_path:
         print("RTSP_URL environment varaible not defined")
         exit(-1)
-    path = "rtspsrc location=" + rtsp_path + " latency=0 ! rtph264depay ! h264parse !  appsink"
+    path = "rtspsrc protocols=tcp location=" + rtsp_path + " latency=0 ! rtph264depay ! h264parse !  appsink"
     print("Path is:" + path)
     cam = Camera(path)
 
