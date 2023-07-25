@@ -15,9 +15,9 @@ class Camera():
         # load process
         print("Starting process")
         self.p = mp.Process(target=self.update, args=(child_conn, rtsp_url))
-        # start process
-        print("Starting daemon")
-        self.p.daemon = True
+        # # start process
+        # print("Starting daemon")
+        # self.p.daemon = True
         self.p.start()
 
     def end(self):
