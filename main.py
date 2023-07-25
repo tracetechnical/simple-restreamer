@@ -125,7 +125,9 @@ if __name__ == '__main__':
     if not rtsp_path:
         print("RTSP_URL environment varaible not defined")
         exit(-1)
-    cam = Camera("rtspsrc location=" + rtsp_path + " ! decodebin")
+    path = "rtspsrc location=" + rtsp_path + " latency=0 ! rtph264depay ! h264parse ! omxh264dec ! videoconvert ! appsink"
+    print("Path is:" + path)
+    cam = Camera(path)
 
     print(f"Camera is alive?: {cam.p.is_alive()}")
 
