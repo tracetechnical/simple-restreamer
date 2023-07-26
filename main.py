@@ -20,7 +20,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
             while True:
-                if self.server.started == True:
+                if self.server.started:
                     img = self.server.frame
                 else:
                     img = np.zeros((1, 1, 3), dtype=np.uint8)
@@ -36,7 +36,10 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
-            img = self.server.frame
+            if self.server.started:
+                img = self.server.frame
+            else:
+                img = np.zeros((1, 1, 3), dtype=np.uint8)
             r, buf = cv2.imencode(".jpg", img)
             self.wfile.write("--jpgboundary\r\n".encode())
             self.send_header('Content-type', 'image/jpeg')
@@ -64,6 +67,7 @@ def thread_function(rtsp_url, server):
     print("Cam Loading...")
     os.putenv("OPENCV_FFMPEG_CAPTURE_OPTIONS", "rtsp_transport;tcp")
     cap = cv2.VideoCapture(rtsp_url, cv2.CAP_FFMPEG)
+    cap.setExceptionMode(True)
     print("Cam Loaded...")
     while True:
         server.started = True
