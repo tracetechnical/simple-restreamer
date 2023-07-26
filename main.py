@@ -67,6 +67,8 @@ def thread_function(rtsp_url, server):
     print("Cam Loaded...")
     while True:
         server.started = True
+        if not cap.isOpened():
+            print("HUFFFFFFFFERS!")
         try:
             ret, server.frame = cap.read()
         except:
