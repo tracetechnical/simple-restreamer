@@ -3,6 +3,7 @@ import multiprocessing as mp
 import time
 import os
 from multiprocessing import freeze_support
+from socketserver import ThreadingMixIn
 
 import cv2
 class Camera():
@@ -114,12 +115,14 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write('</body></html>')
             return
 
+class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
+    """Handle requests in a separate thread."""
 
 if __name__ == '__main__':
     freeze_support()
 
     port = 8000
-    server = http.server.HTTPServer(('', port), CamHandler)
+    server = ThreadedHTTPServer(('', port), CamHandler)
     time.sleep(5)
     rtsp_path = os.getenv("RTSP_URL")
     if not rtsp_path:
