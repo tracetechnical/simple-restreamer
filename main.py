@@ -34,17 +34,13 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
 
         if self.path.endswith('.jpg'):
             self.send_response(200)
-            self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
+            self.send_header('Content-type', 'image/jpeg')
             self.end_headers()
             if self.server.started:
                 img = self.server.frame
             else:
                 img = np.zeros((1, 1, 3), dtype=np.uint8)
             r, buf = cv2.imencode(".jpg", img)
-            self.wfile.write("--jpgboundary\r\n".encode())
-            self.send_header('Content-type', 'image/jpeg')
-            self.send_header('Content-length', str(len(buf)))
-            self.end_headers()
             self.wfile.write(bytearray(buf))
             self.wfile.write('\r\n'.encode())
 
