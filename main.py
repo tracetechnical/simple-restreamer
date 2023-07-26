@@ -61,6 +61,7 @@ class Camera():
 
         # send request
         self.parent_conn.send(1)
+        frame = []
         try:
             frame = self.parent_conn.recv()
         except EOFError as e:
