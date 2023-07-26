@@ -77,6 +77,8 @@ def thread_function(rtsp_url, server):
             ret, server.frame = cap.read()
         except:
             print("EEEE")
+            cap.release()
+            cap = cv2.VideoCapture(rtsp_url, cv2.CAP_FFMPEG)
 
 
 if __name__ == '__main__':
