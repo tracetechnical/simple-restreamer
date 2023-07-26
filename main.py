@@ -118,7 +118,10 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
 if __name__ == '__main__':
     freeze_support()
 
-    port = 8000
+    port = os.getenv("PORT")
+    if not port:
+        port = 8000
+
     server = http.server.HTTPServer(('', port), CamHandler)
     time.sleep(5)
     rtsp_path = os.getenv("RTSP_URL")
