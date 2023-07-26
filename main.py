@@ -85,7 +85,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
             while True:
-                img = cam.get_frame()
+                img = cam_mjpeg.get_frame()
                 r, buf = cv2.imencode(".jpg", img)
                 self.wfile.write("--jpgboundary\r\n".encode())
                 self.send_header('Content-type', 'image/jpeg')
@@ -98,7 +98,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
-            img = cam.get_frame()
+            img = cam_jpeg.get_frame()
             r, buf = cv2.imencode(".jpg", img)
             self.wfile.write("--jpgboundary\r\n".encode())
             self.send_header('Content-type', 'image/jpeg')
@@ -135,9 +135,11 @@ if __name__ == '__main__':
     if not rtsp_path:
         print("RTSP_URL environment varaible not defined")
         exit(-1)
-    cam = Camera(rtsp_path)
+    cam_mjpeg = Camera(rtsp_path)
+    cam_jpeg = Camera(rtsp_path)
 
-    print(f"Camera is alive?: {cam.p.is_alive()}")
+    print(f"MJPEG Camera is alive?: {cam_mjpeg.p.is_alive()}")
+    print(f"JPEG Camera is alive?: {cam_jpeg.p.is_alive()}")
 
     print("server started on: ")
     server.serve_forever()
