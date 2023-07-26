@@ -125,7 +125,7 @@ class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
 if __name__ == '__main__':
     freeze_support()
 
-    port = os.getenv("PORT")
+    port = int(os.getenv("PORT"))
     if not port:
         port = 8000
 
