@@ -22,11 +22,11 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             while True:
                 if self.server.started:
                     img = self.server.frame
+                    if img.empty():
+                        exit(-1)
                 else:
                     img = np.zeros((1, 1, 3), dtype=np.uint8)
 
-                if img.empty():
-                    exit(-1)
                 r, buf = cv2.imencode(".jpg", img)
                 if not r:
                     exit(-2)
@@ -44,11 +44,11 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             if self.server.started:
                 img = self.server.frame
+                if img.empty():
+                    exit(-1)
             else:
                 img = np.zeros((1, 1, 3), dtype=np.uint8)
 
-            if img.empty():
-                exit(-1)
             r, buf = cv2.imencode(".jpg", img)
             if not r:
                 exit(-2)
