@@ -22,9 +22,6 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             while True:
                 if self.server.started:
                     img = self.server.frame
-                    image = cv2.imread(img)
-                    if image == none:
-                        exit(-1)
                 else:
                     img = np.zeros((1, 1, 3), dtype=np.uint8)
 
@@ -45,9 +42,6 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             if self.server.started:
                 img = self.server.frame
-                image = cv2.imread(img)
-                if image == none:
-                    exit(-1)
             else:
                 img = np.zeros((1, 1, 3), dtype=np.uint8)
 
@@ -85,6 +79,8 @@ def thread_function(rtsp_url, server):
             print("HUFFFFFFFFERS!")
         try:
             ret, server.frame = cap.read()
+            if not ret:
+                exit(-1)
         except:
             print("EEEE")
             cap.release()
