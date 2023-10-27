@@ -3,7 +3,8 @@ FROM python:3.10-bullseye
 WORKDIR /opt/app
 
 COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txtsudo apt-get install libgstreamer1.0-dev \
+RUN pip3 install -r requirements.txt
+RUN sudo apt-get install libgstreamer1.0-dev \
   libgstreamer-plugins-base1.0-dev \
   libgstreamer-plugins-bad1.0-dev \
   gstreamer1.0-plugins-base \
