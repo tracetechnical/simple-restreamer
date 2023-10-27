@@ -101,7 +101,7 @@ def thread_function(rtsp_url, server):
             ret, server.frame = cap.read()
             if not ret:
                 exit(-1)
-        except as inst:
+        except Exception as inst:
             print(type(inst))  # the exception type
             print(inst.args)  # arguments stored in .args
             print(inst)  # __str__ allows args to be printed directly,
