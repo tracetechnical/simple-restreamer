@@ -101,7 +101,14 @@ def thread_function(rtsp_url, server):
             ret, server.frame = cap.read()
             if not ret:
                 exit(-1)
-        except:
+        except as inst:
+            print(type(inst))  # the exception type
+            print(inst.args)  # arguments stored in .args
+            print(inst)  # __str__ allows args to be printed directly,
+            # but may be overridden in exception subclasses
+            x, y = inst.args  # unpack args
+            print('x =', x)
+            print('y =', y)
             print("EEEE")
             cap.release()
             cap = open_cam_rtsp(rtsp_url, 1024, 768, 100)
