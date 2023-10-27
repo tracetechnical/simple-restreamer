@@ -104,7 +104,7 @@ def thread_function(rtsp_url, server):
         except:
             print("EEEE")
             cap.release()
-            cap = cv2.VideoCapture(rtsp_url, cv2.CAP_FFMPEG)
+            cap = open_cam_rtsp(rtsp_url, 1024, 768, 100)
 
 
 if __name__ == '__main__':
