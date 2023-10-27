@@ -69,8 +69,7 @@ class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
 
 def thread_function(rtsp_url, server):
     print("Cam Loading...")
-    os.putenv("OPENCV_FFMPEG_CAPTURE_OPTIONS", "rtsp_transport;tcp")
-    cap = cv2.VideoCapture(rtsp_url, cv2.CAP_FFMPEG)
+    cap = cv2.VideoCapture(rtsp_url, cv2.CAP_GSTREAMER)
     cap.setExceptionMode(True)
     print("Cam Loaded...")
     while True:
