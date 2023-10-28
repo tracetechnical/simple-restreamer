@@ -72,7 +72,7 @@ def thread_function(rtsp_url, server):
             with lo:
                 ret, frame = cap.read()
                 if server.started:
-                    img = server.frame
+                    img = frame
                 else:
                     img = np.zeros((1, 1, 3), dtype=np.uint8)
 
