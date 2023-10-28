@@ -43,7 +43,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write('<html><head></head><body>')
             self.wfile.write('<img src="cam.mjpg"/>')
             self.wfile.write('</body></html>')
-            returng
+            return
 
 
 class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
