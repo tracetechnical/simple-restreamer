@@ -81,7 +81,7 @@ def open_cam_rtsp(uri, width, height, latency):
         # Otherwise try to use the software decoder 'avdec_h264'
         # NOTE: in case resizing images is necessary, try adding
         #       a 'videoscale' into the pipeline
-        gst_str = ('rtspsrc location={} latency={} drop-on-latency=true ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink').format(uri, latency)
+        gst_str = ('rtspsrc location={} latency={} drop-on-latency=true ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink drop=true').format(uri, latency)
     else:
         raise RuntimeError('H.264 decoder not found!')
     return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
