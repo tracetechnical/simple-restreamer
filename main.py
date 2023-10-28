@@ -70,14 +70,14 @@ def thread_function(rtsp_url, server):
         server.started = True
         if not cap.isOpened():
             logging.info("HUFFFFFFFFERS!")
-            time.sleep(5)
         try:
             logging.info("Read")
             ret, frame = cap.read()
             if not frame:
                 frame = np.zeros((1, 1, 3), dtype=np.uint8)
             logging.info(ret)
-            r2, server.frameOut = cv2.imencode(".jpg", frame)
+            r2, frameOut = cv2.imencode(".jpg", frame)
+            server.frameOut = frameOut
             logging.info(r2)
         except Exception as inst:
             logging.info(type(inst))  # the exception type
