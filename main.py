@@ -1,4 +1,5 @@
 import http.server
+import logging
 import os
 import subprocess
 import threading
@@ -33,7 +34,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(bytearray(buf))
                 self.wfile.write('\r\n'.encode())
-                time.sleep(100)
+                time.sleep(0.1)
 
         if self.path.endswith('.jpg'):
             self.send_response(200)
@@ -75,34 +76,31 @@ def open_cam_rtsp(uri, width, height, latency):
 
 
 def thread_function(rtsp_url, server):
-    print("Cam Loading...")
+    logging.info("Cam Loading...")
     cap = open_cam_rtsp(rtsp_url, 1024, 768, 100)
     cap.setExceptionMode(True)
-    print("Cam Loaded...")
+    logging.info("Cam Loaded...")
     while True:
         server.started = True
         if not cap.isOpened():
-            print("HUFFFFFFFFERS!")
+            logging.info("HUFFFFFFFFERS!")
         try:
             ret, server.frame = cap.read()
             if not ret:
                 exit(-1)
         except Exception as inst:
-            print(type(inst))  # the exception type
-            print(inst.args)  # arguments stored in .args
-            print(inst)  # __str__ allows args to be printed directly,
+            logging.info(type(inst))  # the exception type
+            logging.info(inst.args)  # arguments stored in .args
+            logging.info(inst)  # __str__ allows args to be printed directly,
             # but may be overridden in exception subclasses
-            x, y = inst.args  # unpack args
-            print('x =', x)
-            print('y =', y)
-            print("EEEE")
+            logging.info("EEEE")
             cap.release()
             cap = open_cam_rtsp(rtsp_url, 1024, 768, 100)
 
 
 if __name__ == '__main__':
-    print(cv2.getBuildInformation())
-    time.sleep(40)
+    logging.info(cv2.getBuildInformation())
+    time.sleep(30)
     freeze_support()
 
     port = int(os.getenv("PORT"))
