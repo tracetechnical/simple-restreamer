@@ -71,10 +71,7 @@ def thread_function(rtsp_url, server):
         try:
             with lo:
                 ret, frame = cap.read()
-                if server.started:
-                    img = frame
-                else:
-                    img = np.zeros((1, 1, 3), dtype=np.uint8)
+                img = frame
 
                 r, server.frame = cv2.imencode(".jpg", img)
                 if not r:
