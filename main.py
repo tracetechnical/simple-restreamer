@@ -72,6 +72,7 @@ def thread_function(rtsp_url, server):
         server.started = True
         if not cap.isOpened():
             logging.info("HUFFFFFFFFERS!")
+            time.sleep(5)
         try:
             logging.info("Read")
             ret, frame = cap.read()
