@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/pytorch:19.12-py3
+FROM python:3.9.18-bullseye
 
 # OpenCV custom build instructions from:
 # https://medium.com/@galaktyk01/how-to-build-opencv-with-gstreamer-b11668fa09c
@@ -28,7 +28,7 @@ RUN apt-get install -y libgstreamer1.0-0 \
 WORKDIR /
 RUN git clone --recursive https://github.com/skvark/opencv-python.git
 WORKDIR /opencv-python
-RUN export CMAKE_ARGS="-DWITH_GSTREAMER=ON"
+RUN export CMAKE_ARGS="-DWITH_GSTREAMER=ON -DWITH_CUDA=OFF"
 RUN pip install --upgrade pip wheel
 # this is the build step - the repo estimates it can take from 5
 #   mins to > 2 hrs depending on your computer hardware
