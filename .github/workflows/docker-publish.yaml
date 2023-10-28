@@ -3,7 +3,7 @@ name: Build Docker Image
 on:
   push:
     branches:
-      - master
+      - image
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -46,7 +46,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-image
           tags: |
             type=raw,value=${{ steps.tag_version.outputs.new_tag }}
             type=raw,value=latest
