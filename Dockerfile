@@ -15,7 +15,6 @@ RUN apt-get install -y libgstreamer1.0-0 \
             gstreamer1.0-plugins-bad \
             gstreamer1.0-plugins-ugly \
             gstreamer1.0-libav \
-            gstreamer1.0-doc \
             gstreamer1.0-tools \
             libgstreamer1.0-dev \
             libgstreamer-plugins-base1.0-dev \
