@@ -10,6 +10,7 @@ import cv2
 import numpy as np
 
 lo = Lock()
+frameOut = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
 
 class CamHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
@@ -21,9 +22,9 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             while True:
                 self.wfile.write("--jpgboundary\r\n".encode())
                 self.send_header('Content-type', 'image/jpeg')
-                self.send_header('Content-length', str(len(self.server.frame)))
+                self.send_header('Content-length', str(len(frameOut)))
                 self.end_headers()
-                self.wfile.write(bytearray(self.server.frame))
+                self.wfile.write(bytearray(frameOut))
                 self.wfile.write('\r\n'.encode())
                 time.sleep(0.1)
 
@@ -32,7 +33,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-type', 'image/jpeg')
             self.end_headers()
 
-            self.wfile.write(bytearray(self.server.frame))
+            self.wfile.write(bytearray(frameOut))
             self.wfile.write('\r\n'.encode())
 
         if self.path.endswith('.html') or self.path == "/":
@@ -40,15 +41,12 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('<html><head></head><body>')
-            self.wfile.write(
-                '<img src="cam.mjpg"/>')
+            self.wfile.write('<img src="cam.mjpg"/>')
             self.wfile.write('</body></html>')
-            return
+            returng
 
 
 class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
-    """Handle requests in a separate thread."""
-
 
 def open_cam_rtsp(uri, width, height, latency):
     """Open an RTSP URI (IP CAM)."""
@@ -59,7 +57,7 @@ def open_cam_rtsp(uri, width, height, latency):
 
 
 def thread_function(rtsp_url, server):
-    global lo
+    global lo,frameOut
     logging.info("Cam Loading...")
     cap = open_cam_rtsp(rtsp_url, 1024, 768, 100)
     cap.setExceptionMode(True)
@@ -71,7 +69,7 @@ def thread_function(rtsp_url, server):
         try:
             with lo:
                 ret, frame = cap.read()
-                r, server.frame = cv2.imencode(".jpg", frame)
+                r, frameOut = cv2.imencode(".jpg", frame)
                 if not r:
                     exit(-2)
             if not ret:
@@ -96,7 +94,6 @@ if __name__ == '__main__':
         port = 8000
 
     server = ThreadedHTTPServer(('', port), CamHandler)
-    server.frame = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
     server.started = False
     # time.sleep(5)
     rtsp_path = os.getenv("RTSP_URL")
