@@ -15,6 +15,7 @@ r, frameOut = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
 
 class CamHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
+        global frameOut
         print(self.path)
         if self.path.endswith('.mjpg'):
             self.send_response(200)
@@ -71,8 +72,8 @@ def thread_function(rtsp_url, server):
         try:
             with lo:
                 ret, frame = cap.read()
-                r, frameOut = cv2.imencode(".jpg", frame)
-                if not r:
+                r2, frameOut = cv2.imencode(".jpg", frame)
+                if not r2:
                     exit(-2)
             if not ret:
                 exit(-1)
