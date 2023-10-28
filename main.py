@@ -70,6 +70,7 @@ def thread_function(rtsp_url, server):
         if not cap.isOpened():
             logging.info("HUFFFFFFFFERS!")
         try:
+            logging.info("Read")
             ret, frame = cap.read()
             if not ret:
                 exit(-1)
@@ -88,6 +89,8 @@ def thread_function(rtsp_url, server):
 
 
 if __name__ == '__main__':
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
     logging.info(cv2.getBuildInformation())
     # time.sleep(30)
     freeze_support()
