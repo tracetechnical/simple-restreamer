@@ -73,12 +73,8 @@ def thread_function(rtsp_url, server):
             logging.info("Read")
             ret, frame = cap.read()
             logging.info(ret)
-            if not ret:
-                exit(-1)
             r2, frameOut = cv2.imencode(".jpg", frame)
             logging.info(r2)
-            if not r2:
-                exit(-2)
         except Exception as inst:
             logging.info(type(inst))  # the exception type
             logging.info(inst.args)  # arguments stored in .args
