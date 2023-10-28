@@ -58,6 +58,7 @@ def open_cam_rtsp(uri, width, height, latency):
         'rtspsrc location={} latency={} drop-on-latency=true ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink').format(
         uri, latency)
     logging.info("gst:" + gst_str)
+    time.sleep(10)
     return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
 
 
