@@ -10,12 +10,9 @@ import cv2
 import numpy as np
 
 lo = Lock()
-r, frameOut = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
-
 
 class CamHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
-        global frameOut
         print(self.path)
         if self.path.endswith('.mjpg'):
             self.send_response(200)
@@ -24,9 +21,10 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             while True:
                 self.wfile.write("--jpgboundary\r\n".encode())
                 self.send_header('Content-type', 'image/jpeg')
-                self.send_header('Content-length', str(len(frameOut)))
+                logging.info(str(len(server.frameOut)))
+                self.send_header('Content-length', str(len(server.frameOut)))
                 self.end_headers()
-                self.wfile.write(bytearray(frameOut))
+                self.wfile.write(bytearray(server.frameOut))
                 self.wfile.write('\r\n'.encode())
                 time.sleep(0.1)
 
@@ -63,7 +61,7 @@ def open_cam_rtsp(uri, width, height, latency):
 
 
 def thread_function(rtsp_url, server):
-    global lo, frameOut
+    global lo
     logging.info("Cam Loading...")
     cap = open_cam_rtsp(rtsp_url, 1024, 768, 100)
     cap.setExceptionMode(True)
@@ -79,7 +77,7 @@ def thread_function(rtsp_url, server):
             if not frame:
                 frame = np.zeros((1, 1, 3), dtype=np.uint8)
             logging.info(ret)
-            r2, frameOut = cv2.imencode(".jpg", frame)
+            r2, server.frameOut = cv2.imencode(".jpg", frame)
             logging.info(r2)
         except Exception as inst:
             logging.info(type(inst))  # the exception type
@@ -104,6 +102,8 @@ if __name__ == '__main__':
 
     server = ThreadedHTTPServer(('', port), CamHandler)
     server.started = False
+    r, frameOut = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
+    server.frameOut = frameOut
     # time.sleep(5)
     rtsp_path = os.getenv("RTSP_URL")
     if not rtsp_path:
