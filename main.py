@@ -48,6 +48,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
 
 
 class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
+    """Handle requests in a separate thread."""
 
 
 def open_cam_rtsp(uri, width, height, latency):
@@ -56,7 +57,6 @@ def open_cam_rtsp(uri, width, height, latency):
         'rtspsrc location={} latency={} drop-on-latency=true ! queue ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! videoscale ! video/x-raw,width=1024,height=768,format=BGR ! appsink max-buffers=1 drop=True').format(
         uri, latency)
     return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
-
 
 def thread_function(rtsp_url, server):
     global lo, frameOut
