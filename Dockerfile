@@ -26,36 +26,16 @@ RUN apt-get install -y libgstreamer1.0-0 \
 
 # Clone OpenCV repo
 WORKDIR /
-RUN git clone https://github.com/opencv/opencv.git
-WORKDIR /opencv
-RUN git checkout 4.2.0
-
-# Build OpenCV
-RUN mkdir /opencv/build
-WORKDIR /opencv/build
-RUN ln -s /opt/conda/lib/python3.6/site-packages/numpy/core/include/numpy /usr/include/numpy
-RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
-    -D INSTALL_PYTHON_EXAMPLES=ON \
-    -D INSTALL_C_EXAMPLES=OFF \
-    -D PYTHON_EXECUTABLE=$(which python) \
-    -D BUILD_opencv_python2=OFF \
-    -D CMAKE_INSTALL_PREFIX=$(python -c "import sys; print(sys.prefix)") \
-    -D PYTHON3_EXECUTABLE=$(which python3) \
-    -D PYTHON3_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
-    -D PYTHON3_PACKAGES_PATH=$(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
-    -D WITH_GSTREAMER=ON \
-    -D BUILD_EXAMPLES=ON ..
-RUN make -j$(nproc)
-
-# Install OpenCV
-RUN make install
-RUN ldconfig
+RUN git clone --recursive https://github.com/skvark/opencv-python.git
+WORKDIR /opencv-python
+RUN export CMAKE_ARGS="-DWITH_GSTREAMER=ON"
+RUN pip install --upgrade pip wheel
+# this is the build step - the repo estimates it can take from 5
+#   mins to > 2 hrs depending on your computer hardware
+RUN pip wheel . --verbose
+RUN pip install opencv_python*.whl
 
 WORKDIR /opt/app
-
-RUN apt install python3
-COPY requirements.txt requirements.txt
-RUN python -m pip install -r requirements.txt
 
 COPY . .
 
