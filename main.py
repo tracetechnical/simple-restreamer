@@ -19,20 +19,11 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
             while True:
-                if self.server.started:
-                    img = self.server.frame
-                else:
-                    img = np.zeros((1, 1, 3), dtype=np.uint8)
-
-                r, buf = cv2.imencode(".jpg", img)
-                if not r:
-                    exit(-2)
-
                 self.wfile.write("--jpgboundary\r\n".encode())
                 self.send_header('Content-type', 'image/jpeg')
-                self.send_header('Content-length', str(len(buf)))
+                self.send_header('Content-length', str(len(self.server.frame)))
                 self.end_headers()
-                self.wfile.write(bytearray(buf))
+                self.wfile.write(bytearray(self.server.frame))
                 self.wfile.write('\r\n'.encode())
                 time.sleep(0.1)
 
@@ -40,16 +31,8 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'image/jpeg')
             self.end_headers()
-            if self.server.started:
-                img = self.server.frame
-            else:
-                img = np.zeros((1, 1, 3), dtype=np.uint8)
 
-            r, buf = cv2.imencode(".jpg", img)
-            if not r:
-                exit(-2)
-
-            self.wfile.write(bytearray(buf))
+            self.wfile.write(bytearray(self.server.frame))
             self.wfile.write('\r\n'.encode())
 
         if self.path.endswith('.html') or self.path == "/":
@@ -87,7 +70,16 @@ def thread_function(rtsp_url, server):
             logging.info("HUFFFFFFFFERS!")
         try:
             with lo:
-                ret, server.frame = cap.read()
+                ret, frame = cap.read()
+                if server.started:
+                    img = server.frame
+                else:
+                    img = np.zeros((1, 1, 3), dtype=np.uint8)
+
+                r, server.frame = cv2.imencode(".jpg", img)
+                if not r:
+                    exit(-2)
+
             if not ret:
                 exit(-1)
         except Exception as inst:
