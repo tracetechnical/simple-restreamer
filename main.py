@@ -72,6 +72,8 @@ def thread_function(rtsp_url, server):
         try:
             logging.info("Read")
             ret, frame = cap.read()
+            if not frame:
+                frame = np.zeros((1, 1, 3), dtype=np.uint8)
             logging.info(ret)
             r2, frameOut = cv2.imencode(".jpg", frame)
             logging.info(r2)
