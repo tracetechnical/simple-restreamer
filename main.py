@@ -11,6 +11,7 @@ import numpy as np
 
 lo = Lock()
 
+
 class CamHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         print(self.path)
@@ -51,7 +52,9 @@ class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
 def open_cam_rtsp(uri, width, height, latency):
     """Open an RTSP URI (IP CAM)."""
     gst_str = (
-        'rtspsrc location={} latency={} drop-on-latency=true ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink').format(
+        'rtspsrc location={} latency={} drop-on-latency=true ! rtph264depay ! h264parse ! avdec_h264 ! videoscale '
+        'method=0 add-borders=false ! video/x-raw,width=2000,height=1000  ! videoflip method=horizontal-flip ! '
+        'videoconvert ! appsink').format(
         uri, latency)
     logging.info("gst:" + gst_str)
     time.sleep(5)
