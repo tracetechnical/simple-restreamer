@@ -4,4 +4,4 @@ WORKDIR /opt/app
 
 COPY . .
 
-CMD [ "python3", "main.py"]
+CMD [ "python3", "-u", "main.py"]
