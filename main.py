@@ -1,15 +1,15 @@
 import http.server
 import logging
 import os
-import subprocess
 import threading
 import time
-from multiprocessing import freeze_support
+from multiprocessing import freeze_support, Lock
 from socketserver import ThreadingMixIn
 
 import cv2
 import numpy as np
 
+lo = Lock()
 
 class CamHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
@@ -76,6 +76,7 @@ def open_cam_rtsp(uri, width, height, latency):
 
 
 def thread_function(rtsp_url, server):
+    global lo
     logging.info("Cam Loading...")
     cap = open_cam_rtsp(rtsp_url, 1024, 768, 100)
     cap.setExceptionMode(True)
@@ -85,7 +86,8 @@ def thread_function(rtsp_url, server):
         if not cap.isOpened():
             logging.info("HUFFFFFFFFERS!")
         try:
-            ret, server.frame = cap.read()
+            with lo:
+                ret, server.frame = cap.read()
             if not ret:
                 exit(-1)
         except Exception as inst:
@@ -100,7 +102,7 @@ def thread_function(rtsp_url, server):
 
 if __name__ == '__main__':
     logging.info(cv2.getBuildInformation())
-    time.sleep(30)
+    # time.sleep(30)
     freeze_support()
 
     port = int(os.getenv("PORT"))
@@ -110,7 +112,7 @@ if __name__ == '__main__':
     server = ThreadedHTTPServer(('', port), CamHandler)
     server.frame = np.zeros((1, 1, 3), dtype=np.uint8)
     server.started = False
-    time.sleep(5)
+    # time.sleep(5)
     rtsp_path = os.getenv("RTSP_URL")
     if not rtsp_path:
         print("RTSP_URL environment varaible not defined")
