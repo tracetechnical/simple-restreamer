@@ -32,7 +32,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-type', 'image/jpeg')
             self.end_headers()
 
-            self.wfile.write(bytearray(frameOut))
+            self.wfile.write(bytearray(server.frameOut))
             self.wfile.write('\r\n'.encode())
 
         if self.path.endswith('.html') or self.path == "/":
