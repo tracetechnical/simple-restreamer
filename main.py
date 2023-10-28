@@ -12,6 +12,7 @@ import numpy as np
 lo = Lock()
 frameOut = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
 
+
 class CamHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         print(self.path)
@@ -48,6 +49,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
 
 class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
 
+
 def open_cam_rtsp(uri, width, height, latency):
     """Open an RTSP URI (IP CAM)."""
     gst_str = (
@@ -57,7 +59,7 @@ def open_cam_rtsp(uri, width, height, latency):
 
 
 def thread_function(rtsp_url, server):
-    global lo,frameOut
+    global lo, frameOut
     logging.info("Cam Loading...")
     cap = open_cam_rtsp(rtsp_url, 1024, 768, 100)
     cap.setExceptionMode(True)
