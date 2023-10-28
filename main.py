@@ -60,6 +60,7 @@ def open_cam_rtsp(uri, width, height, latency):
     logging.info("gst:" + gst_str)
     return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
 
+
 def thread_function(rtsp_url, server):
     global lo, frameOut
     logging.info("Cam Loading...")
