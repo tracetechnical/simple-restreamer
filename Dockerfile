@@ -1,5 +1,5 @@
 FROM ubuntu:20.04
-g
+
 RUN apt-get update
 RUN apt-get upgrade -y
 
