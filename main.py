@@ -113,6 +113,8 @@ def thread_function(rtsp_url, server):
 
 
 if __name__ == '__main__':
+    print(cv2.getBuildInformation())
+    time.sleep(40)
     freeze_support()
 
     port = int(os.getenv("PORT"))
