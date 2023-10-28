@@ -21,12 +21,10 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             while True:
                 self.wfile.write("--jpgboundary\r\n".encode())
                 self.send_header('Content-type', 'image/jpeg')
-                logging.info(str(len(server.frameOut)))
                 self.send_header('Content-length', str(len(server.frameOut)))
                 self.end_headers()
                 self.wfile.write(bytearray(server.frameOut))
                 self.wfile.write('\r\n'.encode())
-                time.sleep(0.1)
 
         if self.path.endswith('.jpg'):
             self.send_response(200)
