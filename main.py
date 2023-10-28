@@ -10,7 +10,7 @@ import cv2
 import numpy as np
 
 lo = Lock()
-frameOut = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
+r, frameOut = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
 
 
 class CamHandler(http.server.BaseHTTPRequestHandler):
