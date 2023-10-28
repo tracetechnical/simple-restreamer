@@ -71,12 +71,9 @@ def thread_function(rtsp_url, server):
         try:
             with lo:
                 ret, frame = cap.read()
-                img = frame
-
-                r, server.frame = cv2.imencode(".jpg", img)
+                r, server.frame = cv2.imencode(".jpg", frame)
                 if not r:
                     exit(-2)
-
             if not ret:
                 exit(-1)
         except Exception as inst:
@@ -99,7 +96,7 @@ if __name__ == '__main__':
         port = 8000
 
     server = ThreadedHTTPServer(('', port), CamHandler)
-    server.frame = cv2.imencode(".jpg",np.zeros((1, 1, 3), dtype=np.uint8))
+    server.frame = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
     server.started = False
     # time.sleep(5)
     rtsp_path = os.getenv("RTSP_URL")
