@@ -71,7 +71,7 @@ def open_cam_rtsp(uri, width, height, latency):
     gst_elements = str(subprocess.check_output('gst-inspect-1.0'))
     if 'omxh264dec' in gst_elements:
         # Use hardware H.264 decoder on Jetson platforms
-        gst_str = ('rtspsrc location={} latency={} ! '
+        gst_str = ('gst-lartspsrc location={} latency={} ! '
                    'rtph264depay ! h264parse ! omxh264dec ! '
                    'nvvidconv ! '
                    'video/x-raw, width=(int){}, height=(int){}, '
@@ -81,9 +81,7 @@ def open_cam_rtsp(uri, width, height, latency):
         # Otherwise try to use the software decoder 'avdec_h264'
         # NOTE: in case resizing images is necessary, try adding
         #       a 'videoscale' into the pipeline
-        gst_str = ('rtspsrc location={} latency={} ! '
-                   'rtph264depay ! h264parse ! avdec_h264 ! '
-                   'videoconvert ! appsink').format(uri, latency)
+        gst_str = ('rtspsrc location={} latency={} ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink').format(uri, latency)
     else:
         raise RuntimeError('H.264 decoder not found!')
     return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
