@@ -70,10 +70,9 @@ def thread_function(rtsp_url, server):
         if not cap.isOpened():
             logging.info("HUFFFFFFFFERS!")
         try:
-            with lo:
-                ret, frame = cap.read()
-                if not ret:
-                    exit(-1)
+            ret, frame = cap.read()
+            if not ret:
+                exit(-1)
             r2, frameOut = cv2.imencode(".jpg", frame)
             logging.info(r2)
             if not r2:
