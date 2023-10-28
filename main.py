@@ -53,7 +53,7 @@ class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
 def open_cam_rtsp(uri, width, height, latency):
     """Open an RTSP URI (IP CAM)."""
     gst_str = (
-        'rtspsrc location={} latency={} drop-on-latency=true ! queue ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! videoscale ! video/x-raw,width=640,height=480,format=BGR ! appsink max-buffers=1 drop=True').format(
+        'rtspsrc location={} latency={} drop-on-latency=true ! queue ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! videoscale ! video/x-raw,width=1024,height=768,format=BGR ! appsink max-buffers=1 drop=True').format(
         uri, latency)
     return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
 
@@ -99,7 +99,7 @@ if __name__ == '__main__':
         port = 8000
 
     server = ThreadedHTTPServer(('', port), CamHandler)
-    server.frame = np.zeros((1, 1, 3), dtype=np.uint8)
+    server.frame = cv2.imencode(".jpg",np.zeros((1, 1, 3), dtype=np.uint8))
     server.started = False
     # time.sleep(5)
     rtsp_path = os.getenv("RTSP_URL")
