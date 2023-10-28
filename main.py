@@ -70,7 +70,7 @@ class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
 def open_cam_rtsp(uri, width, height, latency):
     """Open an RTSP URI (IP CAM)."""
     gst_str = (
-        'rtspsrc location={} latency={} drop-on-latency=true ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsinkv max-buffers=1 drop=True').format(
+        'rtspsrc location={} latency={} drop-on-latency=true ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink max-buffers=1 drop=True').format(
         uri, latency)
     return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
 
