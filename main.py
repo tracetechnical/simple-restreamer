@@ -49,11 +49,20 @@ class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
     """Handle requests in a separate thread."""
 
 
-def open_cam_rtsp(uri, width, height, latency):
+def open_cam_rtsp(uri, rotation, latency):
     """Open an RTSP URI (IP CAM)."""
+    rotation_str = ''
+    if rotation == 90:
+        rotation_str = '! videoflip method=clockwise'
+    if rotation == 180:
+        rotation_str = '! videoflip method=rotate-180'
+    if rotation == 270:
+        rotation_str = '! videoflip method=counterclockwise'
+
+
     gst_str = (
         'rtspsrc location={} latency={} drop-on-latency=true ! rtph264depay ! h264parse ! avdec_h264 ! videoscale '
-        'method=0 add-borders=false ! video/x-raw,width=1500,height=750  ! videoflip method=rotate-180 ! '
+        'method=0 add-borders=false ! video/x-raw,width=1500,height=750 ' + rotation_str + ' ! '
         'videoconvert ! appsink').format(
         uri, latency)
     logging.info("gst:" + gst_str)
@@ -62,8 +71,10 @@ def open_cam_rtsp(uri, width, height, latency):
 
 def thread_function(rtsp_url, server):
     global lo
+
+    rot_angle=int(os.getenv("ROTATION"))
     logging.info("Cam Loading...")
-    cap = open_cam_rtsp(rtsp_url, 1024, 768, 100)
+    cap = open_cam_rtsp(rtsp_url, rot_angle, 100)
     cap.setExceptionMode(True)
     logging.info("Cam Loaded...")
     while True:
@@ -86,7 +97,7 @@ def thread_function(rtsp_url, server):
             # but may be overridden in exception subclasses
             logging.info("EEEE")
             cap.release()
-            cap = open_cam_rtsp(rtsp_url, 1024, 768, 100)
+            cap = open_cam_rtsp(rtsp_url, rot_angle, 100)
 
 
 if __name__ == '__main__':
