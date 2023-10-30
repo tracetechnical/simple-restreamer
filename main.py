@@ -90,15 +90,20 @@ def thread_function(rtsp_url, server):
             r2, frameOut = cv2.imencode(".jpg", frame)
             server.frameOut = frameOut
             logging.info(r2)
+            if not ret:
+                cap = reconn(cap, rtsp_url, rot_angle)
         except Exception as inst:
             logging.info(type(inst))  # the exception type
             logging.info(inst.args)  # arguments stored in .args
             logging.info(inst)  # __str__ allows args to be printed directly,
             # but may be overridden in exception subclasses
-            logging.info("EEEE")
-            cap.release()
-            cap = open_cam_rtsp(rtsp_url, rot_angle, 100)
+            logging.info("Exception: ----0-0-0-0----")
+            cap = reconn(cap, rtsp_url, rot_angle)
 
+
+def reconn(cap, rtsp_url, rot_angle):
+    cap.release()
+    return open_cam_rtsp(rtsp_url, rot_angle, 100)
 
 if __name__ == '__main__':
     logger = logging.getLogger()
