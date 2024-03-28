@@ -53,14 +53,15 @@ class VideoCapture:
 
   # read frames as soon as they are available, keeping only most recent one
   def _reader(self):
+    frame = np.zeros((1, 1, 3), dtype=np.uint8)
     while True:
         ret = False
         if not self.cap.isOpened():
             logging.info("HUFFFFFFFFERS!")
         try:
-            logging.info("Read")
             ret, frame = self.cap.read()
-        except:
+        except Exception as e:
+            logging.error(e)
             pass
         if not ret:
             self.cap = cv2.VideoCapture(self.name, cv2.CAP_GSTREAMER)
@@ -81,7 +82,6 @@ def thread_function(rtsp_url, server):
     logging.info("Cam Loading...")
     cap = VideoCapture(rtsp_url)
     logging.info("Cam Loaded...")
-    frame = np.zeros((1, 1, 3), dtype=np.uint8)
     while True:
         server.started = True
         try:
