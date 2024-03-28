@@ -45,7 +45,7 @@ class VideoCapture:
 
   def __init__(self, name):
     self.name = name
-    self.cap = cv2.VideoCapture(f"rtspsrc location={self.name} latency=0 drop-on-latency=True", cv2.CAP_GSTREAMER)
+    self.cap = cv2.VideoCapture(f"rtspsrc location={self.name} latency=0 drop-on-latency=true ! rtph264depay ! h264parse ! decodebin ! videoconvert ! appsink", cv2.CAP_GSTREAMER)
     self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     self.q = queue.Queue()
     t = threading.Thread(target=self._reader)
@@ -60,7 +60,7 @@ class VideoCapture:
         try:
             ret, frame = self.cap.read()
             if not ret:
-                self.cap = cv2.VideoCapture(f"rtspsrc location={self.name} latency=0 drop-on-latency=True", cv2.CAP_GSTREAMER)
+                self.cap = cv2.VideoCapture(f"rtspsrc location={self.name} latency=0 drop-on-latency=true ! rtph264depay ! h264parse ! decodebin ! videoconvert ! appsink", cv2.CAP_GSTREAMER)
                 self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
             else:
                 if not self.q.empty():
