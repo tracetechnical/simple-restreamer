@@ -61,13 +61,12 @@ class VideoCapture:
             if not ret:
                 self.cap = cv2.VideoCapture(self.name, cv2.CAP_GSTREAMER)
             else:
-                if frame:
-                    if not self.q.empty():
-                        try:
-                          self.q.get_nowait()   # discard previous (unprocessed) frame
-                        except queue.Empty:
-                          pass
-                        self.q.put(frame)
+                if not self.q.empty():
+                    try:
+                      self.q.get_nowait()   # discard previous (unprocessed) frame
+                    except queue.Empty:
+                      pass
+                    self.q.put(frame)
         except Exception as e:
             logging.error(e)
             pass
