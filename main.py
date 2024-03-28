@@ -45,7 +45,7 @@ class VideoCapture:
 
   def __init__(self, name):
     self.name = name
-    self.cap = cv2.VideoCapture(name, cv2.CAP_GSTREAMER)
+    self.cap = cv2.VideoCapture(f"rtspsrc location={self.name} latency=0 drop-on-latency=True", cv2.CAP_GSTREAMER)
     self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     self.q = queue.Queue()
     t = threading.Thread(target=self._reader)
