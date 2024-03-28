@@ -61,7 +61,7 @@ class VideoCapture:
         if not self.cap.isOpened():
             logging.info("HUFFFFFFFFERS!")
         ret = self.cap.grab()
-        if ct % 5 == 0:
+        if ct % 2 == 0:
             try:
                 ret, frame = self.cap.retrieve()
                 if not ret:
