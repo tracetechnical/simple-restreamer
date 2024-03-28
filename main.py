@@ -60,8 +60,8 @@ def open_cam_rtsp(uri, rotation, latency):
 
 
     gst_str = (
-        'rtspsrc location={} latency=10 buffer-mode=auto ! rtph264depay ! h264parse ! decodebin ! '
-        + rotation_str + ' ! videoconvert ! appsink').format(
+        'rtspsrc location={} latency=10 buffer-mode=auto ! rtph264depay ! queue leaky=downstream ! h264parse ! decodebin ! '
+        + rotation_str + ' ! videoconvert ! queue leaky=downstream ! appsink').format(
         uri, latency)
     logging.info("gst:" + gst_str)
     return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
