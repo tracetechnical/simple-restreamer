@@ -60,12 +60,6 @@ class VideoCapture:
         try:
             logging.info("Read")
             ret, frame = self.cap.read()
-            if not ret:
-                frame = np.zeros((1, 1, 3), dtype=np.uint8)
-            logging.info(ret)
-            r2, frameOut = cv2.imencode(".jpg", frame)
-            server.frameOut = frameOut
-            logging.info(r2)
         except:
             pass
         if not ret:
@@ -87,6 +81,7 @@ def thread_function(rtsp_url, server):
     logging.info("Cam Loading...")
     cap = VideoCapture(rtsp_url)
     logging.info("Cam Loaded...")
+    frame = np.zeros((1, 1, 3), dtype=np.uint8)
     while True:
         server.started = True
         try:
