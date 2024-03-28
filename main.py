@@ -60,7 +60,7 @@ def open_cam_rtsp(uri, rotation, latency):
 
 
     gst_str = (
-        'rtspsrc location={} latency=10 buffer-mode=auto ! rtph264depay ! queue leaky=downstream ! h264parse ! decodebin ! '
+        'rtspsrc location={} latency=10 buffer-mode=auto drop-on-latency=true ! rtph264depay ! queue leaky=downstream ! h264parse ! decodebin ! '
         + rotation_str + ' ! videoconvert ! queue leaky=downstream ! appsink').format(
         uri, latency)
     logging.info("gst:" + gst_str)
@@ -80,14 +80,11 @@ def thread_function(rtsp_url, server):
         if not cap.isOpened():
             logging.info("HUFFFFFFFFERS!")
         try:
-            logging.info("Read")
             ret, frame = cap.read()
             if not ret:
                 frame = np.zeros((1, 1, 3), dtype=np.uint8)
-            logging.info(ret)
-            r2, frameOut = cv2.imencode(".jpg", frame)
-            server.frameOut = frameOut
-            logging.info(r2)
+            r2, frameOutr = cv2.imencode(".jpg", frame)
+            server.frameOut = frameOutr
             if not ret:
                 cap = reconn(cap, rtsp_url, rot_angle)
         except Exception as inst:
