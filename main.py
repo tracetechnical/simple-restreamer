@@ -2,13 +2,11 @@ import http.server
 import logging
 import os
 import threading
-from multiprocessing import freeze_support, Lock
-from socketserver import ThreadingMixIn
-
 import cv2
 import numpy as np
-
-lo = Lock()
+import queue
+from multiprocessing import freeze_support
+from socketserver import ThreadingMixIn
 
 
 class CamHandler(http.server.BaseHTTPRequestHandler):
@@ -43,17 +41,37 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write('</body></html>')
             return
 
+class VideoCapture:
+
+  def __init__(self, name):
+    self.cap = cv2.VideoCapture(name, cv2.CAP_GSTREAMER)
+    self.q = queue.Queue()
+    t = threading.Thread(target=self._reader)
+    t.daemon = True
+    t.start()
+
+  # read frames as soon as they are available, keeping only most recent one
+  def _reader(self):
+    while True:
+      ret, frame = self.cap.read()
+      if not ret:
+        break
+      if not self.q.empty():
+        try:
+          self.q.get_nowait()   # discard previous (unprocessed) frame
+        except queue.Empty:
+          pass
+      self.q.put(frame)
+
+  def read(self):
+    return self.q.get()
 
 class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
-    """Handl447e requests in a separate thread."""
+    """Handle requests in a separate thread."""
 
 def thread_function(rtsp_url, server):
-    global lo
-
-    rot_angle = int(os.getenv("ROTATION"))
     logging.info("Cam Loading...")
-    cap = cv2.VideoCapture(rtsp_url, cv2.CAP_GSTREAMER)
-    cap.setExceptionMode(True)
+    cap = VideoCapture(rtsp_url)
     logging.info("Cam Loaded...")
     while True:
         server.started = True
