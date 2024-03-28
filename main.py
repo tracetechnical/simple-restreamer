@@ -60,7 +60,7 @@ def open_cam_rtsp(uri, rotation, latency):
 
 
     gst_str = (
-        'rtspsrc location={} latency=0 buffer-mode=auto ! rtph264depay ! h264parse ! decodebin ! '
+        'rtspsrc location={} latency=10 buffer-mode=auto ! rtph264depay ! h264parse ! decodebin ! '
         + rotation_str + ' ! videoconvert ! appsink').format(
         uri, latency)
     logging.info("gst:" + gst_str)
