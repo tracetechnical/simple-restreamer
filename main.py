@@ -55,22 +55,21 @@ class VideoCapture:
   def _reader(self):
     frame = np.zeros((1, 1, 3), dtype=np.uint8)
     while True:
-        ret = False
         if not self.cap.isOpened():
             logging.info("HUFFFFFFFFERS!")
         try:
             ret, frame = self.cap.read()
+            if not ret:
+                self.cap = cv2.VideoCapture(self.name, cv2.CAP_GSTREAMER)
+            if not self.q.empty():
+                try:
+                  self.q.get_nowait()   # discard previous (unprocessed) frame
+                except queue.Empty:
+                  pass
+            self.q.put(frame)
         except Exception as e:
             logging.error(e)
             pass
-        if not ret:
-            self.cap = cv2.VideoCapture(self.name, cv2.CAP_GSTREAMER)
-        if not self.q.empty():
-            try:
-              self.q.get_nowait()   # discard previous (unprocessed) frame
-            except queue.Empty:
-              pass
-            self.q.put(frame)
 
   def read(self):
     return self.q.get()
