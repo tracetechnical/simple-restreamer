@@ -52,11 +52,11 @@ def open_cam_rtsp(uri, rotation, latency):
     """Open an RTSP URI (IP CAM)."""
     rotation_str = ''
     if rotation == 90:
-        rotation_str = '! videoflip method=clockwise'
+        rotation_str = 'videoflip method=clockwise'
     if rotation == 180:
-        rotation_str = '! videoflip method=rotate-180'
+        rotation_str = 'videoflip method=rotate-180'
     if rotation == 270:
-        rotation_str = '! videoflip method=counterclockwise'
+        rotation_str = 'videoflip method=counterclockwise'
 
 
     gst_str = (
