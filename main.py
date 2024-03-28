@@ -76,20 +76,15 @@ def thread_function(rtsp_url, server):
     while True:
         server.started = True
         try:
-            ret, frame = cap.read()
-            if not ret:
-                frame = np.zeros((1, 1, 3), dtype=np.uint8)
+            frame = cap.read()
             r2, frameOutr = cv2.imencode(".jpg", frame)
             server.frameOut = frameOutr
-            if not ret:
-                cap = reconn(cap, rtsp_url)
         except Exception as inst:
             logging.info(type(inst))  # the exception type
             logging.info(inst.args)  # arguments stored in .args
             logging.info(inst)  # __str__ allows args to be printed directly,
             # but may be overridden in exception subclasses
             logging.info("Exception: ----0-0-0-0----")
-            cap = reconn(cap, rtsp_url)
 
 def reconn(cap, rtsp_url):
     cap.release()
