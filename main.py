@@ -55,27 +55,23 @@ class VideoCapture:
 
   # read frames as soon as they are available, keeping only most recent one
   def _reader(self):
-    ct = 0
     while True:
-        ct += 1
         if not self.cap.isOpened():
             logging.info("HUFFFFFFFFERS!")
-        ret = self.cap.grab()
-        if ct % 2 == 0:
-            try:
-                ret, frame = self.cap.retrieve()
-                if not ret:
-                    self.cap = cv2.VideoCapture(self.gst, cv2.CAP_GSTREAMER)
-                else:
-                    if not self.q.empty():
-                        try:
-                          self.q.get_nowait()   # discard previous (unprocessed) frame
-                        except queue.Empty:
-                          pass
-                    self.q.put(frame)
-            except Exception as e:
-                logging.error(e)
-                pass
+        try:
+            ret, frame = self.cap.read()
+            if not ret:
+                self.cap = cv2.VideoCapture(self.gst, cv2.CAP_GSTREAMER)
+            else:
+                if not self.q.empty():
+                    try:
+                      self.q.get_nowait()   # discard previous (unprocessed) frame
+                    except queue.Empty:
+                      pass
+                self.q.put(frame)
+        except Exception as e:
+            logging.error(e)
+            pass
 
   def read(self):
     return self.q.get()
