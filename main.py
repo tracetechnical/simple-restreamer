@@ -44,6 +44,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
 class VideoCapture:
 
   def __init__(self, name):
+    self.name = name
     self.cap = cv2.VideoCapture(name, cv2.CAP_GSTREAMER)
     self.q = queue.Queue()
     t = threading.Thread(target=self._reader)
@@ -53,15 +54,28 @@ class VideoCapture:
   # read frames as soon as they are available, keeping only most recent one
   def _reader(self):
     while True:
-      ret, frame = self.cap.read()
-      if not ret:
-        break
-      if not self.q.empty():
+        ret = False
+        if not self.cap.isOpened():
+            logging.info("HUFFFFFFFFERS!")
         try:
-          self.q.get_nowait()   # discard previous (unprocessed) frame
-        except queue.Empty:
-          pass
-      self.q.put(frame)
+            logging.info("Read")
+            ret, frame = self.cap.read()
+            if not ret:
+                frame = np.zeros((1, 1, 3), dtype=np.uint8)
+            logging.info(ret)
+            r2, frameOut = cv2.imencode(".jpg", frame)
+            server.frameOut = frameOut
+            logging.info(r2)
+        except:
+            pass
+        if not ret:
+            self.cap = cv2.VideoCapture(self.name, cv2.CAP_GSTREAMER)
+        if not self.q.empty():
+            try:
+              self.q.get_nowait()   # discard previous (unprocessed) frame
+            except queue.Empty:
+              pass
+            self.q.put(frame)
 
   def read(self):
     return self.q.get()
