@@ -59,12 +59,13 @@ def open_cam_rtsp(uri, rotation, latency):
         rotation_str = 'videoflip method=counterclockwise'
 
 
-    gst_str = (
-        'rtspsrc location={} latency=10 buffer-mode=auto drop-on-latency=true ! rtph264depay ! queue leaky=downstream ! h264parse ! decodebin ! '
-        + rotation_str + ' ! videoconvert ! queue leaky=downstream ! appsink').format(
-        uri, latency)
-    logging.info("gst:" + gst_str)
-    return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
+    # gst_str = (
+    #     'rtspsrc location={} latency=10 buffer-mode=auto drop-on-latency=true ! rtph264depay ! queue leaky=downstream ! h264parse ! decodebin ! '
+    #     + rotation_str + ' ! videoconvert ! queue leaky=downstream ! appsink').format(
+    #     uri, latency)
+    # logging.info("gst:" + gst_str)
+    return cv2.VideoCapture(uri)
+    # , cv2.CAP_GSTREAMER)
 
 
 def thread_function(rtsp_url, server):
