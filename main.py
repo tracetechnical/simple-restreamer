@@ -2,7 +2,6 @@ import http.server
 import logging
 import os
 import threading
-import time
 from multiprocessing import freeze_support, Lock
 from socketserver import ThreadingMixIn
 
