@@ -50,21 +50,13 @@ class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
 
 def open_cam_rtsp(uri, rotation, latency):
     """Open an RTSP URI (IP CAM)."""
-    rotation_str = ''
-    if rotation == 90:
-        rotation_str = 'videoflip method=clockwise'
-    if rotation == 180:
-        rotation_str = 'videoflip method=rotate-180'
-    if rotation == 270:
-        rotation_str = 'videoflip method=counterclockwise'
-
     gst_str = (
             'rtspsrc location={} latency=10 buffer-mode=auto drop-on-latency=true ! rtph264depay ! '
-            'queue leaky=downstream ! h264parse ! decodebin ! ' + rotation_str + ' ! '
+            'queue leaky=downstream ! h264parse ! decodebin ! '
             'video/x-raw,width=1024,height=768 ! videoconvert ! queue leaky=downstream ! appsink').format(
         uri, latency)
     logging.info("gst:" + gst_str)
-    return cv2.VideoCapture(uri, cv2.CAP_GSTREAMER)
+    return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
 
 
 def thread_function(rtsp_url, server):
