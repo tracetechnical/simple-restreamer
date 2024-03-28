@@ -69,6 +69,8 @@ class VideoCapture:
                     except queue.Empty:
                       pass
                 self.q.put(frame)
+            while ret:
+                ret, frame = self.cap.read()
         except Exception as e:
             logging.error(e)
             pass
