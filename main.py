@@ -45,7 +45,7 @@ class VideoCapture:
 
   def __init__(self, name):
     self.name = name
-    self.gst = f"rtspsrc location={self.name} latency=0 drop-on-latency=true ! queue ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink"
+    self.gst = f"rtspsrc location={self.name} latency=0 drop-on-latency=true ! queue ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink max-buffers=1 drop=True"
     logging.info(f"GST String is '{self.gst}'")
     self.cap = cv2.VideoCapture(self.gst, cv2.CAP_GSTREAMER)
     self.q = queue.Queue()
