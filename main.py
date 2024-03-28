@@ -60,7 +60,7 @@ class VideoCapture:
         try:
             ret, frame = self.cap.read()
             if not ret:
-                self.cap = cv2.VideoCapture(f"rtspsrc location={self.name} ! decodebin ! videoconvert ! appsink max-buffers=1 drop=true", cv2.CAP_GSTREAMER)
+                self.cap = cv2.VideoCapture(self.name, cv2.CAP_GSTREAMER)
                 self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
             else:
                 if not self.q.empty():
