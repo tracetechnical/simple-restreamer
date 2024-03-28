@@ -58,20 +58,19 @@ def open_cam_rtsp(uri, rotation, latency):
     if rotation == 270:
         rotation_str = 'videoflip method=counterclockwise'
 
-
-    # gst_str = (
-    #     'rtspsrc location={} latency=10 buffer-mode=auto drop-on-latency=true ! rtph264depay ! queue leaky=downstream ! h264parse ! decodebin ! '
-    #     + rotation_str + ' ! videoconvert ! queue leaky=downstream ! appsink').format(
-    #     uri, latency)
-    # logging.info("gst:" + gst_str)
-    return cv2.VideoCapture(uri)
-    # , cv2.CAP_GSTREAMER)
+    gst_str = (
+            'rtspsrc location={} latency=10 buffer-mode=auto drop-on-latency=true ! rtph264depay ! '
+            'queue leaky=downstream ! h264parse ! decodebin ! ' + rotation_str + ' ! '
+            'video/x-raw,width=1024,height=768 ! videoconvert ! queue leaky=downstream ! appsink').format(
+        uri, latency)
+    logging.info("gst:" + gst_str)
+    return cv2.VideoCapture(uri, cv2.CAP_GSTREAMER)
 
 
 def thread_function(rtsp_url, server):
     global lo
 
-    rot_angle=int(os.getenv("ROTATION"))
+    rot_angle = int(os.getenv("ROTATION"))
     logging.info("Cam Loading...")
     cap = open_cam_rtsp(rtsp_url, rot_angle, 100)
     cap.setExceptionMode(True)
@@ -100,6 +99,7 @@ def thread_function(rtsp_url, server):
 def reconn(cap, rtsp_url, rot_angle):
     cap.release()
     return open_cam_rtsp(rtsp_url, rot_angle, 100)
+
 
 if __name__ == '__main__':
     logger = logging.getLogger()
