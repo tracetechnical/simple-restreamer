@@ -66,7 +66,7 @@ class VideoCapture:
                       self.q.get_nowait()   # discard previous (unprocessed) frame
                     except queue.Empty:
                       pass
-                    self.q.put(frame)
+                self.q.put(frame)
         except Exception as e:
             logging.error(e)
             pass
