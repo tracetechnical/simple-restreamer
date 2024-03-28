@@ -45,26 +45,14 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
 
 
 class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
-    """Handle requests in a separate thread."""
-
-
-def open_cam_rtsp(uri, rotation, latency):
-    """Open an RTSP URI (IP CAM)."""
-    gst_str = (
-            'rtspsrc location={} latency=10 buffer-mode=auto drop-on-latency=true ! rtph264depay ! '
-            'queue leaky=downstream ! h264parse ! decodebin ! '
-            'video/x-raw,width=1024,height=768 ! videoconvert ! queue leaky=downstream ! appsink').format(
-        uri, latency)
-    logging.info("gst:" + gst_str)
-    return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
-
+    """Handl447e requests in a separate thread."""
 
 def thread_function(rtsp_url, server):
     global lo
 
     rot_angle = int(os.getenv("ROTATION"))
     logging.info("Cam Loading...")
-    cap = open_cam_rtsp(rtsp_url, rot_angle, 100)
+    cap = cv2.VideoCapture(rtsp_url, cv2.CAP_GSTREAMER)
     cap.setExceptionMode(True)
     logging.info("Cam Loaded...")
     while True:
@@ -78,19 +66,18 @@ def thread_function(rtsp_url, server):
             r2, frameOutr = cv2.imencode(".jpg", frame)
             server.frameOut = frameOutr
             if not ret:
-                cap = reconn(cap, rtsp_url, rot_angle)
+                cap = reconn(cap, rtsp_url)
         except Exception as inst:
             logging.info(type(inst))  # the exception type
             logging.info(inst.args)  # arguments stored in .args
             logging.info(inst)  # __str__ allows args to be printed directly,
             # but may be overridden in exception subclasses
             logging.info("Exception: ----0-0-0-0----")
-            cap = reconn(cap, rtsp_url, rot_angle)
+            cap = reconn(cap, rtsp_url)
 
-
-def reconn(cap, rtsp_url, rot_angle):
+def reconn(cap, rtsp_url):
     cap.release()
-    return open_cam_rtsp(rtsp_url, rot_angle, 100)
+    return cv2.VideoCapture(rtsp_url, cv2.CAP_GSTREAMER)
 
 
 if __name__ == '__main__':
