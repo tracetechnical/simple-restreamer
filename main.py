@@ -85,7 +85,8 @@ def thread_function(rtsp_url, server):
         server.started = True
         try:
             frame = cap.read()
-            r2, frameOutr = cv2.imencode(".jpg", frame)
+            encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
+            r2, frameOutr = cv2.imencode(".jpg", frame, encode_param)
             server.frameOut = frameOutr
         except Exception as inst:
             logging.info(type(inst))  # the exception type
