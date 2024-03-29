@@ -11,7 +11,6 @@ from socketserver import ThreadingMixIn
 
 class CamHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
-        print(self.path)
         if self.path.endswith('.mjpg'):
             self.send_response(200)
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
@@ -28,7 +27,6 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'image/jpeg')
             self.end_headers()
-
             self.wfile.write(server.frameOut)
             self.wfile.write('\r\n'.encode())
 
@@ -89,7 +87,7 @@ def thread_function(rtsp_url, server):
             frame = cap.read()
             encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
             r2, frameOutr = cv2.imencode(".jpg", frame, encode_param)
-            server.frameOut = bytearray(frameOutr)
+            server.frameOut = frameOutr.tobytes()
         except Exception as inst:
             logging.info(type(inst))  # the exception type
             logging.info(inst.args)  # arguments stored in .args
@@ -97,16 +95,10 @@ def thread_function(rtsp_url, server):
             # but may be overridden in exception subclasses
             logging.info("Exception: ----0-0-0-0----")
 
-def reconn(cap, rtsp_url):
-    cap.release()
-    return cv2.VideoCapture(rtsp_url, cv2.CAP_GSTREAMER)
-
-
 if __name__ == '__main__':
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     logging.info(cv2.getBuildInformation())
-    # time.sleep(30)
     freeze_support()
 
     port = int(os.getenv("PORT"))
@@ -116,7 +108,7 @@ if __name__ == '__main__':
     server = ThreadedHTTPServer(('', port), CamHandler)
     server.started = False
     r, frameOut = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
-    server.frameOut = bytearray(frameOut)
+    server.frameOut = frameOut.tobytes()
     rtsp_path = os.getenv("RTSP_URL")
     if not rtsp_path:
         print("RTSP_URL environment varaible not defined")
