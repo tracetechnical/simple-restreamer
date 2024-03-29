@@ -21,7 +21,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'image/jpeg')
                 self.send_header('Content-length', str(len(server.frameOut)))
                 self.end_headers()
-                self.wfile.write(bytearray(server.frameOut))
+                self.wfile.write(server.frameOut)
                 self.wfile.write('\r\n'.encode())
 
         if self.path.endswith('.jpg'):
@@ -29,7 +29,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-type', 'image/jpeg')
             self.end_headers()
 
-            self.wfile.write(bytearray(server.frameOut))
+            self.wfile.write(server.frameOut)
             self.wfile.write('\r\n'.encode())
 
         if self.path.endswith('.html') or self.path == "/":
@@ -89,7 +89,7 @@ def thread_function(rtsp_url, server):
             frame = cap.read()
             encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
             r2, frameOutr = cv2.imencode(".jpg", frame, encode_param)
-            server.frameOut = frameOutr
+            server.frameOut = bytearray(frameOutr)
         except Exception as inst:
             logging.info(type(inst))  # the exception type
             logging.info(inst.args)  # arguments stored in .args
@@ -116,8 +116,7 @@ if __name__ == '__main__':
     server = ThreadedHTTPServer(('', port), CamHandler)
     server.started = False
     r, frameOut = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
-    server.frameOut = frameOut
-    # time.sleep(5)
+    server.frameOut = bytearray(frameOut)
     rtsp_path = os.getenv("RTSP_URL")
     if not rtsp_path:
         print("RTSP_URL environment varaible not defined")
