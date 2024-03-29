@@ -10,7 +10,7 @@ from socketserver import ThreadingMixIn
 
 
 class CamHandler(http.server.BaseHTTPRequestHandler):
-    def log_request(self, code, size) -> None:
+    def log_request(self, code='-', size='-') -> None:
         pass
 
     def do_GET(self):
