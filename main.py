@@ -42,6 +42,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write('</body></html>')
             return
 
+
 class VideoCapture:
 
   def __init__(self, name):
@@ -77,8 +78,10 @@ class VideoCapture:
   def read(self):
     return self.q.get()
 
+
 class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
     """Handle requests in a separate thread."""
+
 
 def thread_function(rtsp_url, server):
     logging.info("Cam Loading...")
@@ -98,6 +101,7 @@ def thread_function(rtsp_url, server):
             # but may be overridden in exception subclasses
             logging.info("Exception: ----0-0-0-0----")
 
+
 if __name__ == '__main__':
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
@@ -114,7 +118,7 @@ if __name__ == '__main__':
     server.frameOut = frameOut.tobytes()
     rtsp_path = os.getenv("RTSP_URL")
     if not rtsp_path:
-        print("RTSP_URL environment varaible not defined")
+        print("RTSP_URL environment variable not defined")
         exit(-1)
 
     mjpeg = threading.Thread(target=thread_function, args=(rtsp_path, server), daemon=True)
