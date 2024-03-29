@@ -10,6 +10,9 @@ from socketserver import ThreadingMixIn
 
 
 class CamHandler(http.server.BaseHTTPRequestHandler):
+    def log_request(self, code, size) -> None:
+        pass
+
     def do_GET(self):
         if self.path.endswith('.mjpg'):
             self.send_response(200)
