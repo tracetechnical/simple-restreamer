@@ -113,7 +113,7 @@ def thread_function(rtsp_url, server):
                 x_end = extra['x_end']
                 y_start = extra['y_start']
                 y_end = extra['y_end']
-                r3, sliceFrame = cv2.imencode(".jpg", frame[x_start:x_end, y_start:y_end], encode_param)
+                r3, sliceFrame = cv2.imencode(".jpg", frame[y_start:y_end, x_start:x_end], encode_param)
                 server.slices[extra['name']] = sliceFrame.tobytes()
             r2, frameOutr = cv2.imencode(".jpg", frame, encode_param)
             server.frameOut = frameOutr.tobytes()
