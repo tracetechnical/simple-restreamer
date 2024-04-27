@@ -33,9 +33,13 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             frame = server.frameOut
             if self.path.__contains__('/section/'):
-                section_name = self.path.split('/section/')[1]
-                section = server.slices[section_name.split('/')[0]]
+                section_fragment = self.path.split('/section/')[1]
+                section_name = section_fragment.split('/')[0]
+                print(section_fragment)
+                print(section_name)
+                section = server.slices[section_name]
                 if section:
+                    print("Got sect")
                     frame = section.name
             self.wfile.write(frame)
             self.wfile.write('\r\n'.encode())
