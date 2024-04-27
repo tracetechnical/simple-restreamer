@@ -142,6 +142,7 @@ if __name__ == '__main__':
     server.started = False
     r, frameOut = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
     server.frameOut = frameOut.tobytes()
+    server.slices = []
     rtsp_path = os.getenv("RTSP_URL")
     if not rtsp_path:
         print("RTSP_URL environment variable not defined")
