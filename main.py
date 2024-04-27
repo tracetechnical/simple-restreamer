@@ -99,7 +99,7 @@ def thread_function(rtsp_url, server):
     logging.info("Cam Loading...")
     cap = VideoCapture(rtsp_url)
     logging.info("Cam Loaded...")
-    extra_images = [{'name': 'main', 'x_start': 100, 'x_end': 200, 'y_start': 100, 'y_end': 200}]
+    extra_images = [{'name': 'main', 'x_start': 500, 'x_end': 700, 'y_start': 600, 'y_end': 800}]
     if extra_img:
         extra_images = json.loads(extra_img)
     while True:
