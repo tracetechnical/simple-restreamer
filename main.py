@@ -102,11 +102,17 @@ def thread_function(rtsp_url, server):
         try:
             frame = cap.read()
             encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
+            print(extra_images)
             for extra in extra_images:
                 x_start = extra['x_start']
                 x_end = extra['x_end']
                 y_start = extra['y_start']
                 y_end = extra['y_end']
+                print(x_start)
+                print(x_end)
+                print(y_start)
+                print(y_end)
+                print(extra['name'])
                 r3, sliceFrame = cv2.imencode(".jpg", frame[x_start:x_end][y_start:y_end], encode_param)
                 server.slices[extra['name']] = sliceFrame.tobytes()
             r2, frameOutr = cv2.imencode(".jpg", frame, encode_param)
