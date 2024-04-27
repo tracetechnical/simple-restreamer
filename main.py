@@ -32,6 +32,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-type', 'image/jpeg')
             self.end_headers()
             frame = server.frameOut
+            print(self.path)
             if self.path.__contains__('/section/'):
                 section_fragment = self.path.split('/section/')[1]
                 section_name = section_fragment.split('/')[0]
@@ -40,7 +41,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
                 section = server.slices[section_name]
                 if section:
                     print("Got sect")
-                    frame = section.name
+                    frame = section
             self.wfile.write(frame)
             self.wfile.write('\r\n'.encode())
 
@@ -49,7 +50,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('<html><head></head><body>')
-            self.wfile.write(json.dumps(server.slices))
+            self.wfile.write('' + json.dumps(server.slices))
             self.wfile.write('</body></html>')
             return
 
@@ -112,11 +113,6 @@ def thread_function(rtsp_url, server):
                 x_end = extra['x_end']
                 y_start = extra['y_start']
                 y_end = extra['y_end']
-                print(x_start)
-                print(x_end)
-                print(y_start)
-                print(y_end)
-                print(extra['name'])
                 r3, sliceFrame = cv2.imencode(".jpg", frame[x_start:x_end, y_start:y_end], encode_param)
                 server.slices[extra['name']] = sliceFrame.tobytes()
             r2, frameOutr = cv2.imencode(".jpg", frame, encode_param)
