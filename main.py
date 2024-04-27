@@ -23,7 +23,17 @@ class CamHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'image/jpeg')
                 self.send_header('Content-length', str(len(server.frameOut)))
                 self.end_headers()
-                self.wfile.write(server.frameOut)
+                frame = server.frameOut
+                if self.path.__contains__('/section/'):
+                    section_fragment = self.path.split('/section/')[1]
+                    section_name = section_fragment.split('/')[0]
+                    print(section_fragment)
+                    print(section_name)
+                    section = server.slices[section_name]
+                    if section:
+                        print("Got sect")
+                        frame = section
+                self.wfile.write(frame)
                 self.wfile.write('\r\n'.encode())
 
         if self.path.endswith('.jpg'):
@@ -31,7 +41,6 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'image/jpeg')
             self.end_headers()
             frame = server.frameOut
-            print(self.path)
             if self.path.__contains__('/section/'):
                 section_fragment = self.path.split('/section/')[1]
                 section_name = section_fragment.split('/')[0]
