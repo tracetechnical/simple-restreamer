@@ -99,7 +99,7 @@ def thread_function(rtsp_url, server):
     logging.info("Cam Loading...")
     cap = VideoCapture(rtsp_url)
     logging.info("Cam Loaded...")
-    extra_images = [{'name': 'main', 'x_start': 500, 'x_end': 700, 'y_start': 600, 'y_end': 800}]
+    extra_images = []
     if extra_img:
         extra_images = json.loads(extra_img)
     while True:
@@ -107,14 +107,21 @@ def thread_function(rtsp_url, server):
         try:
             frame = cap.read()
             encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
-            print(extra_images)
-            for extra in extra_images:
-                x_start = extra['x_start']
-                x_end = extra['x_end']
-                y_start = extra['y_start']
-                y_end = extra['y_end']
-                r3, sliceFrame = cv2.imencode(".jpg", frame[y_start:y_end, x_start:x_end], encode_param)
-                server.slices[extra['name']] = sliceFrame.tobytes()
+            try:
+                print(extra_images)
+                for extra in extra_images:
+                    x_start = extra['x_start']
+                    x_end = extra['x_end']
+                    y_start = extra['y_start']
+                    y_end = extra['y_end']
+                    r3, sliceFrame = cv2.imencode(".jpg", frame[y_start:y_end, x_start:x_end], encode_param)
+                    server.slices[extra['name']] = sliceFrame.tobytes()
+            except Exception as inst:
+                logging.info(type(inst))  # the exception type
+                logging.info(inst.args)  # arguments stored in .args
+                logging.info(inst)  # __str__ allows args to be printed directly,
+                # but may be overridden in exception subclasses
+                logging.info("Exception: ----1-1-1-1----")
             r2, frameOutr = cv2.imencode(".jpg", frame, encode_param)
             server.frameOut = frameOutr.tobytes()
         except Exception as inst:
