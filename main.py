@@ -1,4 +1,4 @@
-import http.server
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 import logging
 import os
 import threading
@@ -7,10 +7,9 @@ import numpy as np
 import queue
 import json
 from multiprocessing import freeze_support
-from socketserver import ThreadingMixIn
 
 
-class CamHandler(http.server.BaseHTTPRequestHandler):
+class CamHandler(BaseHTTPRequestHandler):
     def log_request(self, code='-', size='-') -> None:
         pass
 
@@ -91,10 +90,6 @@ class VideoCapture:
     return self.q.get()
 
 
-class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
-    """Handle requests in a separate thread."""
-
-
 def thread_function(rtsp_url, server):
     logging.info("Cam Loading...")
     cap = VideoCapture(rtsp_url)
@@ -145,7 +140,7 @@ if __name__ == '__main__':
     if not port:
         port = 8000
 
-    server = ThreadedHTTPServer(('', port), CamHandler)
+    server = ThreadingHTTPServer(('', port), CamHandler)
     server.started = False
     r, frameOut = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
     server.frameOut = frameOut.tobytes()
@@ -158,5 +153,5 @@ if __name__ == '__main__':
     mjpeg = threading.Thread(target=thread_function, args=(rtsp_path, server), daemon=True)
     mjpeg.start()
 
-    print("server started on: ")
+    print("server started")
     server.serve_forever()
