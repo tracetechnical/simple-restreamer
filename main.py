@@ -34,7 +34,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             frame = server.frameOut
             if self.path.__contains__('/section/'):
                 section_name = self.path.split('/section/')[1]
-                section = server.slices[section_name]
+                section = server.slices[section_name.split('/')[0]]
                 if section:
                     frame = section.name
             self.wfile.write(frame)
