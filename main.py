@@ -5,6 +5,7 @@ import threading
 import cv2
 import numpy as np
 import queue
+import json
 from multiprocessing import freeze_support
 from socketserver import ThreadingMixIn
 
@@ -30,7 +31,13 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'image/jpeg')
             self.end_headers()
-            self.wfile.write(server.frameOut)
+            frame = server.frameOut
+            if self.path.__contains__('/section/'):
+                section_name = self.path.split('/section/')[1]
+                section = server.slices[section_name]
+                if section:
+                    frame = section.name
+            self.wfile.write(frame)
             self.wfile.write('\r\n'.encode())
 
         if self.path.endswith('.html') or self.path == "/":
@@ -38,7 +45,7 @@ class CamHandler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('<html><head></head><body>')
-            self.wfile.write('<img src="cam.mjpg"/>')
+            self.wfile.write(json.dumps(server.slices))
             self.wfile.write('</body></html>')
             return
 
@@ -87,11 +94,21 @@ def thread_function(rtsp_url, server):
     logging.info("Cam Loading...")
     cap = VideoCapture(rtsp_url)
     logging.info("Cam Loaded...")
+    extra_images = [{'name': 'main', 'x_start': 100, 'x_end': 200, 'y_start': 100, 'y_end': 200}]
+    if extra_img:
+        extra_images = json.loads(extra_img)
     while True:
         server.started = True
         try:
             frame = cap.read()
             encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
+            for extra in extra_images:
+                x_start = extra['x_start']
+                x_end = extra['x_end']
+                y_start = extra['y_start']
+                y_end = extra['y_end']
+                r3, sliceFrame = cv2.imencode(".jpg", frame[x_start:x_end][y_start:y_end], encode_param)
+                server.slices[extra['name']] = sliceFrame.tobytes()
             r2, frameOutr = cv2.imencode(".jpg", frame, encode_param)
             server.frameOut = frameOutr.tobytes()
         except Exception as inst:
@@ -109,6 +126,9 @@ if __name__ == '__main__':
     freeze_support()
 
     port = int(os.getenv("PORT"))
+
+    extra_img = os.getenv("EXTRA_IMG")
+
     if not port:
         port = 8000
 
