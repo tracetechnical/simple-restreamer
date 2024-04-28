@@ -1,4 +1,4 @@
-FROM ghcr.io/tracetechnical/simple-restreamer-image:latest
+FROM fizmath/gpu-opencv:latest
 
 WORKDIR /opt/app
 
