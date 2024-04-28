@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import queue
 import json
+import datetime
 from multiprocessing import freeze_support
 
 
@@ -118,7 +119,10 @@ def thread_function(rtsp_url, server):
                     x_end = extra['x_end']
                     y_start = extra['y_start']
                     y_end = extra['y_end']
-                    r3, sliceFrame = cv2.imencode(".jpg", frame[y_start:y_end, x_start:x_end], encode_param)
+                    sliced_image = frame[y_start:y_end, x_start:x_end]
+                    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    cv2.putText(sliced_image, timestamp, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                    r3, sliceFrame = cv2.imencode(".jpg", sliced_image, encode_param)
                     server.slices[extra['name']] = sliceFrame.tobytes()
             except Exception as inst:
                 logging.info(type(inst))  # the exception type
