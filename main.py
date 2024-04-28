@@ -121,7 +121,7 @@ def thread_function(rtsp_url, server):
                     y_end = extra['y_end']
                     sliced_image = frame[y_start:y_end, x_start:x_end].copy()
                     timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    cv2.putText(sliced_image, timestamp, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                    cv2.putText(sliced_image, timestamp, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
                     r3, sliceFrame = cv2.imencode(".jpg", sliced_image, encode_param)
                     server.slices[extra['name']] = sliceFrame.tobytes()
             except Exception as inst:
