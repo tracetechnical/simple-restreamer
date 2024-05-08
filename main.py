@@ -71,6 +71,7 @@ class VideoCapture:
     self.gst = f"rtspsrc location={self.name} latency=0 drop-on-latency=true ! queue ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink max-buffers=1 drop=True"
     logging.info(f"GST String is '{self.gst}'")
     self.cap = cv2.VideoCapture(self.gst, cv2.CAP_GSTREAMER)
+    self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
     self.q = queue.Queue()
     t = threading.Thread(target=self._reader)
     t.daemon = True
@@ -85,6 +86,7 @@ class VideoCapture:
             ret, frame = self.cap.read()
             if not ret:
                 self.cap = cv2.VideoCapture(self.gst, cv2.CAP_GSTREAMER)
+                self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
             else:
                 if not self.q.empty():
                     try:
@@ -103,6 +105,7 @@ class VideoCapture:
 def thread_function(rtsp_url, server):
     logging.info("Cam Loading...")
     cap = VideoCapture(rtsp_url)
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
     logging.info("Cam Loaded...")
     extra_images = []
     if extra_img:
