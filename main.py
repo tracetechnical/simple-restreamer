@@ -113,7 +113,6 @@ def thread_function(rtsp_url, server):
             frame = cap.read()
             encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
             try:
-                print(extra_images)
                 for extra in extra_images:
                     x_start = extra['x_start']
                     x_end = extra['x_end']
