@@ -97,15 +97,15 @@ class VideoCapture:
 
                 if server.sameCount > 20:
                     print("Stuck stream, exiting")
-                    exit(1)
+                    os._exit(1)
             else:
                 if self.q.empty():
                     server.emptyCount += 1
                 else:
                     server.emptyCount = 0
-                if server.emptyCount > 20:
+                if server.emptyCount > 10000:
                     print("Empty queue, exiting")
-                    exit(2)
+                    os._exit(2)
                 if not self.q.empty():
                     try:
                       self.q.get_nowait()   # discard previous (unprocessed) frame
@@ -185,7 +185,7 @@ if __name__ == '__main__':
     rtsp_path = os.getenv("RTSP_URL")
     if not rtsp_path:
         print("RTSP_URL environment variable not defined")
-        exit(-1)
+        os._exit(-1)
 
     mjpeg = threading.Thread(target=thread_function, args=(rtsp_path, server), daemon=True)
     mjpeg.start()
