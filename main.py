@@ -60,7 +60,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('<html><head></head><body>'.encode())
-            self.wfile.write(('TS:'+ json.dumps(server.timestamps) + json.dumps(server.slices)).encode())
+            self.wfile.write(json.dumps(server.slices).encode())
             self.wfile.write('</body></html>'.encode())
             return
 
