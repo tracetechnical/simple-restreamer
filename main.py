@@ -85,6 +85,7 @@ class VideoCapture:
         try:
             ret, frame = self.cap.read()
             if not ret:
+                server.emptyCount = 0
                 self.cap = cv2.VideoCapture(self.gst, cv2.CAP_GSTREAMER)
                 server.timestamp = self.cap.get(cv2.CAP_PROP_POS_MSEC)
 
