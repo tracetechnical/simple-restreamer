@@ -102,7 +102,7 @@ class VideoCapture:
 
 def thread_function(rtsp_url, server):
     logging.info("Cam Loading...")
-    cap = cv2.VideoCapture(rtsp_url)
+    cap = VideoCapture(rtsp_url)
     logging.info("Cam Loaded...")
     extra_images = []
     if extra_img:
@@ -111,7 +111,15 @@ def thread_function(rtsp_url, server):
         server.started = True
         try:
             frame = cap.read()
-            server.timestamps = [cap.get(cv2.CAP_PROP_POS_MSEC)]
+            server.timestamp = cap.get(cv2.CAP_PROP_POS_MSEC)[0]
+            if server.timestamp == server.lastTimestamp:
+                server.sameCount += 1
+            else:
+                server.sameCount = 0
+            server.lastTimestamp = server.timestamp
+            if server.sameCount > 20:
+                print("Stuck stream, exiting")
+                exit(1)
             encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
             try:
                 for extra in extra_images:
@@ -159,7 +167,9 @@ if __name__ == '__main__':
     r, frameOut = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
     server.frameOut = frameOut.tobytes()
     server.slices = {}
-    server.timestamps = {}
+    server.timestamp = 0
+    server.lastTimestamp = 0
+    server.sameCount = 0
     rtsp_path = os.getenv("RTSP_URL")
     if not rtsp_path:
         print("RTSP_URL environment variable not defined")
