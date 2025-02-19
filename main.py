@@ -1,3 +1,4 @@
+import typing
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 import logging
 import os
@@ -111,7 +112,7 @@ def thread_function(rtsp_url, server):
         server.started = True
         try:
             frame = cap.read()
-            server.timestamp = cap.get(cv2.CAP_PROP_POS_MSEC)[0]
+            server.timestamp = typing.cast(cv2.VideoCapture, cap).get(cv2.CAP_PROP_POS_MSEC)
             if server.timestamp == server.lastTimestamp:
                 server.sameCount += 1
             else:
