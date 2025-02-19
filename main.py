@@ -59,7 +59,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('<html><head></head><body>'.encode())
-            self.wfile.write(('' + json.dumps(server.slices)).encode())
+            self.wfile.write(('TS:'+ json.dumps(server.timestamps) + json.dumps(server.slices)).encode())
             self.wfile.write('</body></html>'.encode())
             return
 
@@ -102,7 +102,7 @@ class VideoCapture:
 
 def thread_function(rtsp_url, server):
     logging.info("Cam Loading...")
-    cap = VideoCapture(rtsp_url)
+    cap = cv2.VideoCapture(rtsp_url)
     logging.info("Cam Loaded...")
     extra_images = []
     if extra_img:
@@ -111,6 +111,7 @@ def thread_function(rtsp_url, server):
         server.started = True
         try:
             frame = cap.read()
+            server.timestamps = [cap.get(cv2.CAP_PROP_POS_MSEC)]
             encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
             try:
                 for extra in extra_images:
@@ -158,6 +159,7 @@ if __name__ == '__main__':
     r, frameOut = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
     server.frameOut = frameOut.tobytes()
     server.slices = {}
+    server.timestamps = {}
     rtsp_path = os.getenv("RTSP_URL")
     if not rtsp_path:
         print("RTSP_URL environment variable not defined")
