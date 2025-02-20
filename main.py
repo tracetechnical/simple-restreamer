@@ -104,7 +104,7 @@ class VideoCapture:
                     server.emptyCount += 1
                 else:
                     server.emptyCount = 0
-                if server.emptyCount > 10000:
+                if server.emptyCount > 100000:
                     print("Empty queue, exiting")
                     os._exit(2)
                 if not self.q.empty():
