@@ -80,8 +80,10 @@ class VideoCapture:
   # read frames as soon as they are available, keeping only most recent one
   def _reader(self):
     while True:
+        fail = False
         if not self.cap.isOpened():
-            logging.info("HUFFFFFFFFERS!")
+            logging.info("Stream not open!")
+            fail = True
         try:
             ret, frame = self.cap.read()
             if not ret:
@@ -89,7 +91,7 @@ class VideoCapture:
                 self.cap = cv2.VideoCapture(self.gst, cv2.CAP_GSTREAMER)
                 server.timestamp = self.cap.get(cv2.CAP_PROP_POS_MSEC)
 
-                if server.timestamp == server.lastTimestamp:
+                if fail or server.timestamp == server.lastTimestamp:
                     server.sameCount += 1
                 else:
                     server.sameCount = 0
