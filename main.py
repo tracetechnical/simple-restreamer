@@ -1,197 +1,214 @@
-import typing
-from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
-import logging
 import os
-import threading
 import cv2
-import numpy as np
-import queue
 import json
+import queue
+import logging
+import threading
 import datetime
+import numpy as np
+
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from multiprocessing import freeze_support
 
 
+# =============================
+# Configuration
+# =============================
+
+MJPEG_BOUNDARY = "--jpgboundary"
+JPEG_QUALITY = 80
+FONT = cv2.FONT_HERSHEY_SIMPLEX
+
+
+# =============================
+# HTTP Handler
+# =============================
+
 class CamHandler(BaseHTTPRequestHandler):
-    def log_request(self, code='-', size='-') -> None:
+    """Serves MJPEG streams, JPEG snapshots, and a simple index page."""
+
+    def log_request(self, code='-', size='-'):
+        # Silence default HTTP logging
         pass
 
     def do_GET(self):
-        if self.path.endswith('.mjpg'):
-            self.send_response(200)
-            self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
-            self.end_headers()
-            while True:
-                self.wfile.write("--jpgboundary\r\n".encode())
-                self.send_header('Content-type', 'image/jpeg')
-                self.send_header('Content-length', str(len(server.frameOut)))
-                self.end_headers()
-                frame = server.frameOut
-                if self.path.__contains__('/section/'):
-                    section_fragment = self.path.split('/section/')[1]
-                    section_name = section_fragment.split('/')[0]
-                    print(section_fragment)
-                    print(section_name)
-                    section = server.slices[section_name]
-                    if section:
-                        print("Got sect")
-                        frame = section
-                self.wfile.write(frame)
-                self.wfile.write('\r\n'.encode())
-
-        if self.path.endswith('.jpg'):
-            self.send_response(200)
-            self.send_header('Content-type', 'image/jpeg')
-            self.end_headers()
-            frame = server.frameOut
-            if self.path.__contains__('/section/'):
-                section_fragment = self.path.split('/section/')[1]
-                section_name = section_fragment.split('/')[0]
-                print(section_fragment)
-                print(section_name)
-                section = server.slices[section_name]
-                if section:
-                    print("Got sect")
-                    frame = section
-            self.wfile.write(frame)
-            self.wfile.write('\r\n'.encode())
-
-        if self.path.endswith('.html') or self.path == "/":
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            self.wfile.write('<html><head></head><body>'.encode())
-            self.wfile.write(json.dumps(server.slices).encode())
-            self.wfile.write('</body></html>'.encode())
-            return
-
-
-class VideoCapture:
-
-  def __init__(self, name):
-    self.name = name
-    self.gst = f"rtspsrc location={self.name} latency=100 drop-on-latency=true ! queue ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink max-buffers=1 drop=True"
-    logging.info(f"GST String is '{self.gst}'")
-    self.cap = cv2.VideoCapture(self.gst, cv2.CAP_GSTREAMER)
-    self.q = queue.Queue()
-    t = threading.Thread(target=self._reader)
-    t.daemon = True
-    t.start()
-
-  # read frames as soon as they are available, keeping only most recent one
-  def _reader(self):
-    while True:
-        fail = False
-        if not self.cap.isOpened():
-            logging.info("Stream not open!")
-            fail = True
         try:
-            ret, frame = self.cap.read()
-            if not ret:
-                server.emptyCount = 0
-                self.cap = cv2.VideoCapture(self.gst, cv2.CAP_GSTREAMER)
-                server.timestamp = self.cap.get(cv2.CAP_PROP_POS_MSEC)
-
-                if fail or server.timestamp == server.lastTimestamp:
-                    server.sameCount += 1
-                else:
-                    server.sameCount = 0
-
-                server.lastTimestamp = server.timestamp
-
-                if server.sameCount > 20:
-                    print("Stuck stream, exiting")
-                    os._exit(1)
-            else:
-                if self.q.empty():
-                    server.emptyCount += 1
-                else:
-                    server.emptyCount = 0
-                if server.emptyCount > 100000:
-                    print("Empty queue, exiting")
-                    os._exit(2)
-                if not self.q.empty():
-                    try:
-                      self.q.get_nowait()   # discard previous (unprocessed) frame
-                    except queue.Empty:
-                      pass
-                self.q.put(frame)
-        except Exception as e:
-            logging.error(e)
+            if self.path.endswith(".mjpg"):
+                self._serve_mjpeg()
+            elif self.path.endswith(".jpg"):
+                self._serve_jpeg()
+            elif self.path == "/" or self.path.endswith(".html"):
+                self._serve_index()
+        except BrokenPipeError:
+            # Client disconnected
             pass
 
-  def read(self):
-    return self.q.get()
+    # ---------- Helpers ----------
+
+    def _get_requested_frame(self) -> bytes:
+        """Return full frame or named section frame if requested."""
+        if "/section/" not in self.path:
+            return server.frame_out
+
+        section_name = self.path.split("/section/")[1].split("/")[0]
+        return server.slices.get(section_name, server.frame_out)
+
+    # ---------- Endpoints ----------
+
+    def _serve_mjpeg(self):
+        self.send_response(200)
+        self.send_header(
+            "Content-Type",
+            f"multipart/x-mixed-replace; boundary={MJPEG_BOUNDARY}"
+        )
+        self.end_headers()
+
+        while True:
+            frame = self._get_requested_frame()
+
+            self.wfile.write(f"{MJPEG_BOUNDARY}\r\n".encode())
+            self.send_header("Content-Type", "image/jpeg")
+            self.send_header("Content-Length", str(len(frame)))
+            self.end_headers()
+            self.wfile.write(frame)
+            self.wfile.write(b"\r\n")
+
+    def _serve_jpeg(self):
+        frame = self._get_requested_frame()
+
+        self.send_response(200)
+        self.send_header("Content-Type", "image/jpeg")
+        self.send_header("Content-Length", str(len(frame)))
+        self.end_headers()
+        self.wfile.write(frame)
+
+    def _serve_index(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html")
+        self.end_headers()
+
+        body = {
+            "available_sections": list(server.slices.keys())
+        }
+
+        self.wfile.write(b"<html><body>")
+        self.wfile.write(json.dumps(body, indent=2).encode())
+        self.wfile.write(b"</body></html>")
 
 
-def thread_function(rtsp_url, server):
-    logging.info("Cam Loading...")
+# =============================
+# Video Capture
+# =============================
+
+class VideoCapture:
+    """Threaded RTSP reader keeping only the most recent frame."""
+
+    def __init__(self, rtsp_url: str):
+        self.rtsp_url = rtsp_url
+        self.queue = queue.Queue(maxsize=1)
+
+        self.gst_pipeline = (
+            f"rtspsrc location={rtsp_url} latency=100 drop-on-latency=true ! "
+            "queue ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! "
+            "appsink max-buffers=1 drop=true"
+        )
+
+        logging.info("GStreamer pipeline: %s", self.gst_pipeline)
+        self.cap = cv2.VideoCapture(self.gst_pipeline, cv2.CAP_GSTREAMER)
+
+        threading.Thread(target=self._reader, daemon=True).start()
+
+    def _reader(self):
+        while True:
+            if not self.cap.isOpened():
+                logging.warning("Reopening RTSP stream")
+                self.cap = cv2.VideoCapture(
+                    self.gst_pipeline, cv2.CAP_GSTREAMER
+                )
+
+            ok, frame = self.cap.read()
+            if not ok:
+                continue
+
+            if self.queue.full():
+                try:
+                    self.queue.get_nowait()
+                except queue.Empty:
+                    pass
+
+            self.queue.put(frame)
+
+    def read(self) -> np.ndarray:
+        return self.queue.get()
+
+
+# =============================
+# Frame Processing Thread
+# =============================
+
+def stream_worker(rtsp_url: str, server, extra_images):
     cap = VideoCapture(rtsp_url)
-    logging.info("Cam Loaded...")
-    extra_images = []
-    if extra_img:
-        extra_images = json.loads(extra_img)
+    encode_params = [cv2.IMWRITE_JPEG_QUALITY, JPEG_QUALITY]
+
     while True:
-        server.started = True
-        try:
-            frame = cap.read()
-            encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
+        frame = cap.read()
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # ---- Process slices ----
+        for spec in extra_images:
             try:
-                for extra in extra_images:
-                    x_start = extra['x_start']
-                    x_end = extra['x_end']
-                    y_start = extra['y_start']
-                    y_end = extra['y_end']
-                    sliced_image = frame[y_start:y_end, x_start:x_end].copy()
-                    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    cv2.putText(sliced_image, timestamp, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,), 2)
-                    cv2.putText(sliced_image, timestamp, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,), 1)
-                    r3, sliceFrame = cv2.imencode(".jpg", sliced_image, encode_param)
-                    server.slices[extra['name']] = sliceFrame.tobytes()
-            except Exception as inst:
-                logging.info(type(inst))  # the exception type
-                logging.info(inst.args)  # arguments stored in .args
-                logging.info(inst)  # __str__ allows args to be printed directly,
-                # but may be overridden in exception subclasses
-                logging.info("Exception: ----1-1-1-1----")
-            r2, frameOutr = cv2.imencode(".jpg", frame, encode_param)
-            server.frameOut = frameOutr.tobytes()
-        except Exception as inst:
-            logging.info(type(inst))  # the exception type
-            logging.info(inst.args)  # arguments stored in .args
-            logging.info(inst)  # __str__ allows args to be printed directly,
-            # but may be overridden in exception subclasses
-            logging.info("Exception: ----0-0-0-0----")
+                crop = frame[
+                    spec["y_start"]:spec["y_end"],
+                    spec["x_start"]:spec["x_end"]
+                ].copy()
+
+                cv2.putText(
+                    crop, timestamp,
+                    (10, 25),
+                    FONT, 0.7,
+                    (255,), 2
+                )
+
+                _, jpg = cv2.imencode(".jpg", crop, encode_params)
+                server.slices[spec["name"]] = jpg.tobytes()
+
+            except Exception:
+                logging.exception("Slice processing failed")
+
+        # ---- Full frame ----
+        _, full_jpg = cv2.imencode(".jpg", frame, encode_params)
+        server.frame_out = full_jpg.tobytes()
 
 
-if __name__ == '__main__':
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    logging.info(cv2.getBuildInformation())
+# =============================
+# Main
+# =============================
+
+if __name__ == "__main__":
     freeze_support()
+    logging.basicConfig(level=logging.INFO)
 
-    port = int(os.getenv("PORT"))
-
+    port = int(os.getenv("PORT", "8000"))
+    rtsp_url = os.getenv("RTSP_URL")
     extra_img = os.getenv("EXTRA_IMG")
 
-    if not port:
-        port = 8000
+    if not rtsp_url:
+        raise RuntimeError("RTSP_URL environment variable is required")
 
-    server = ThreadingHTTPServer(('', port), CamHandler)
-    server.started = False
-    r, frameOut = cv2.imencode(".jpg", np.zeros((1, 1, 3), dtype=np.uint8))
-    server.frameOut = frameOut.tobytes()
+    extra_images = json.loads(extra_img) if extra_img else []
+
+    server = ThreadingHTTPServer(("", port), CamHandler)
+
+    # Shared server state
+    _, blank = cv2.imencode(".jpg", np.zeros((1, 1, 3), np.uint8))
+    server.frame_out = blank.tobytes()
     server.slices = {}
-    server.timestamp = 0
-    server.lastTimestamp = 0
-    server.sameCount = 0
-    server.emptyCount = 0
-    rtsp_path = os.getenv("RTSP_URL")
-    if not rtsp_path:
-        print("RTSP_URL environment variable not defined")
-        os._exit(-1)
 
-    mjpeg = threading.Thread(target=thread_function, args=(rtsp_path, server), daemon=True)
-    mjpeg.start()
+    threading.Thread(
+        target=stream_worker,
+        args=(rtsp_url, server, extra_images),
+        daemon=True
+    ).start()
 
-    print("server started")
+    logging.info("MJPEG server running on port %d", port)
     server.serve_forever()
